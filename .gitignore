@@ -195,3 +195,9 @@ gradle-app.setting
 **/build/
 
 # End of https://www.toptal.com/developers/gitignore/api/java,maven,gradle,intellij+iml,macos,windows
+/.idea/$CACHE_FILE$
+/.idea/.gitignore
+/.idea/compiler.xml
+/.idea/encodings.xml
+/.idea/jarRepositories.xml
+/.idea/vcs.xml
