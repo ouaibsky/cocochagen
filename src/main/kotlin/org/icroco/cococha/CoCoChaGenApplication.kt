@@ -17,7 +17,7 @@ class PropertiesVersionProvider : CommandLine.IVersionProvider {
         mixinStandardHelpOptions = true,
         description = ["@|bold Conventional Commit Changelog|@ @|underline Generator|@", ""], versionProvider = PropertiesVersionProvider::class
 )
-class TopCmd : Runnable {
+class CoCoChaCmd : Runnable {
 
     @CommandLine.Option(names = ["-o", "--output"], description = ["output changelog filename",
         "Default value is '\${DEFAULT-VALUE}'"], defaultValue = "CHANGELOG.md")
@@ -40,7 +40,7 @@ class TopCmd : Runnable {
 }
 
 fun main(args: Array<String>) {
-    val commandLine = CommandLine(TopCmd())
+    val commandLine = CommandLine(CoCoChaCmd())
     commandLine.isOptionsCaseInsensitive = true
     System.exit(commandLine.execute(*args))
 }
