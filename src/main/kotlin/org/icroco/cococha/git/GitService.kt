@@ -17,18 +17,21 @@ fun Ref.getSafeObjectId(): ObjectId? {
 }
 
 
-data class SemanticVersion(val major: Int, val minor: Int, val build: Int, val label: String) : Comparable<SemanticVersion> {
+data class SemanticVersion(val major: Int, val minor: Int, val build: Int, val label: String? = null) : Comparable<SemanticVersion> {
+
+    constructor(label: String) : this(-1, -1, -1, label) {
+    }
 
     override fun toString(): String {
-        return if (major == -1) label else "v$major.$minor.$build"
+        return label ?: "v$major.$minor.$build"
     }
 
     override fun compareTo(other: SemanticVersion): Int {
         if (major == other.major) {
-            if (minor == other.minor) {
-                return build - other.build
+            return if (minor == other.minor) {
+                build - other.build
             } else {
-                return minor - other.minor
+                minor - other.minor
             }
         }
         return major - other.major
@@ -36,21 +39,21 @@ data class SemanticVersion(val major: Int, val minor: Int, val build: Int, val l
 }
 
 class GitService(private val baseDir: File? = null) {
-    val repository: Repository = RepositoryBuilder()
+    private val repository: Repository = RepositoryBuilder()
             .readEnvironment()
             .findGitDir(baseDir ?: File("").absoluteFile)
             .build()
-    val git = Git(repository)
+    private val git = Git(repository)
+    private val pattern = Pattern.compile("refs/tags/(v(\\d+)\\.(\\d+)\\.(\\d+))")
 
     fun getSemanticVersionTag(): List<SemanticVersion> {
-        val pattern = Pattern.compile("refs/tags/(v(\\d+)\\.(\\d+)\\.(\\d+))")
         return git.tagList()
                 .call()
                 .asSequence()
-                .sortedBy { ref -> repository.parseCommit(ref.getSafeObjectId()).commitTime }
+                .sortedByDescending { ref -> repository.parseCommit(ref.getSafeObjectId()).commitTime }
                 .map { r -> pattern.matcher(r.name) }
                 .filter { p -> p.matches() }
-                .map { m -> SemanticVersion(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), m.group(1)) }
+                .map { m -> SemanticVersion(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt()) }
                 .toList()
     }
 }

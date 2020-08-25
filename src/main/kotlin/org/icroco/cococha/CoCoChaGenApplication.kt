@@ -54,7 +54,7 @@ class CoCoChaCmd() : Runnable {
         if (listTag) {
             gitService.getSemanticVersionTag().forEach { println(it) }
         }
-        val semVer = if (startTag == null) gitService.getSemanticVersionTag().first() else (SemanticVersion(-1, -1, -1, startTag!!))
+        val semVer = if (startTag == null) gitService.getSemanticVersionTag().first() else (SemanticVersion(startTag!!))
         println("StartTag: $semVer")
     }
 }
