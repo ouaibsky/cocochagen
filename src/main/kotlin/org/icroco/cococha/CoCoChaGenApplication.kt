@@ -1,9 +1,19 @@
 package org.icroco.cococha
 
+import org.icroco.cococha.git.GitService
+import org.icroco.cococha.git.SemanticVersion
 import picocli.CommandLine
 import java.util.*
 
-class CoCoChaGenApplication
+class CoCoChaGenApplication {
+    companion object {
+        @JvmStatic fun main(args: Array<String>) {
+            val commandLine = CommandLine(CoCoChaCmd())
+            commandLine.isOptionsCaseInsensitive = true
+            System.exit(commandLine.execute(*args))
+        }
+    }
+}
 
 class PropertiesVersionProvider : CommandLine.IVersionProvider {
     override fun getVersion(): Array<String> {
@@ -17,7 +27,8 @@ class PropertiesVersionProvider : CommandLine.IVersionProvider {
         mixinStandardHelpOptions = true,
         description = ["@|bold Conventional Commit Changelog|@ @|underline Generator|@", ""], versionProvider = PropertiesVersionProvider::class
 )
-class CoCoChaCmd : Runnable {
+class CoCoChaCmd() : Runnable {
+    private val gitService = GitService()
 
     @CommandLine.Option(names = ["-o", "--output"], description = ["output changelog filename",
         "Default value is '\${DEFAULT-VALUE}'"], defaultValue = "CHANGELOG.md")
@@ -31,16 +42,25 @@ class CoCoChaCmd : Runnable {
         "Default value is '\${DEFAULT-VALUE}'"], split = ",")
     private var commitType: List<String> = listOf("feat,fix")
 
-//    @CommandLine.Option(names = ["-s", "--start-tag"], description = ["Build changelog from this tag (default is from last tag)"])
-//    private var startTag: String? = null
+    @CommandLine.Option(names = ["-l", "--list-tags"], defaultValue = "false", description = ["Filter only those commits type",
+        "Default value is '\${DEFAULT-VALUE}'"])
+    private var listTag: Boolean = false
+
+    @CommandLine.Option(names = ["-s", "--start-tag"], required = false, description = ["Tag to start looking commits",
+        "Default value is '\${DEFAULT-VALUE}'"])
+    private var startTag: String? = null
 
     override fun run() {
-
+        if (listTag) {
+            gitService.getSemanticVersionTag().forEach { println(it) }
+        }
+        val semVer = if (startTag == null) gitService.getSemanticVersionTag().first() else (SemanticVersion(-1, -1, -1, startTag!!))
+        println("StartTag: $semVer")
     }
 }
-
-fun main(args: Array<String>) {
-    val commandLine = CommandLine(CoCoChaCmd())
-    commandLine.isOptionsCaseInsensitive = true
-    System.exit(commandLine.execute(*args))
-}
+//
+//fun main(args: Array<String>) {
+//    val commandLine = CommandLine(CoCoChaCmd())
+//    commandLine.isOptionsCaseInsensitive = true
+//    System.exit(commandLine.execute(*args))
+//}
