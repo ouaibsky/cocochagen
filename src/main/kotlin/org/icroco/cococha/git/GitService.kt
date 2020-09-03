@@ -1,5 +1,6 @@
 package org.icroco.cococha.git
 
+import mu.KLogging
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.Ref
@@ -39,6 +40,8 @@ data class SemanticVersion(val major: Int, val minor: Int, val build: Int, val l
 }
 
 class GitService(private val baseDir: File? = null) {
+    private companion object : KLogging()
+
     private val repository: Repository = RepositoryBuilder()
             .readEnvironment()
             .findGitDir(baseDir ?: File("").absoluteFile)
@@ -51,7 +54,10 @@ class GitService(private val baseDir: File? = null) {
                 .call()
                 .asSequence()
                 .sortedByDescending { ref -> repository.parseCommit(ref.getSafeObjectId()).commitTime }
-                .map { r -> pattern.matcher(r.name) }
+                .map { r ->
+                    logger.debug {  "Found tag: '$r'"}
+                    pattern.matcher(r.name)
+                }
                 .filter { p -> p.matches() }
                 .map { m -> SemanticVersion(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt()) }
                 .toList()

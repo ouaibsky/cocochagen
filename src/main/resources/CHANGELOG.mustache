@@ -1,0 +1,15 @@
+{{#header}}
+{{this}}
+
+{{/header}}
+{{#releases}}
+    {{#-first}}# {{/-first}}{{^-first}}## {{/-first}} {{relName}} ({{#relDate}}{{this}}{{/relDate}})
+{{#categories}}## {{type.fullName}}
+{{#cards}}
+    * {{#component}}**this: **{{/component}}{{description}}. {{#trackerId}}{{trackerUrl}}{{this}}{{/trackerId}}
+{{/cards}}
+{{/categories}}
+{{/releases}}
+{{#footer}}
+    {{this}}
+{{/footer}}
