@@ -17,7 +17,10 @@ fun Ref.getSafeObjectId(): ObjectId {
 }
 
 
-data class VersionTag(val major: Int, val minor: Int, val build: Int, val tagName: String? = null) : Comparable<VersionTag> {
+data class VersionTag(val major: Int,
+                      val minor: Int,
+                      val build: Int,
+                      val tagName: String? = null) : Comparable<VersionTag> {
 
     constructor(tagName: String) : this(-1, -1, -1, tagName) {
     }
@@ -27,7 +30,7 @@ data class VersionTag(val major: Int, val minor: Int, val build: Int, val tagNam
     }
 
     override fun toString(): String {
-        return if (isSemantic()) "v$major.$minor.$build" else tagName!!.removePrefix("/refs/tags/")
+        return if (isSemantic()) "v$major.$minor.$build" else tagName!!.removePrefix("refs/tags/")
     }
 
     override fun compareTo(other: VersionTag): Int {
@@ -55,36 +58,36 @@ class GitService(private val baseDir: File? = null) {
     private companion object : KLogging()
 
     private val repository: Repository = RepositoryBuilder()
-            .readEnvironment()
-            .findGitDir(baseDir ?: File("").absoluteFile)
-            .build()
+        .readEnvironment()
+        .findGitDir(baseDir ?: File("").absoluteFile)
+        .build()
     private val git = Git(repository)
-    private val pattern = Pattern.compile("refs/tags/(v(\\d+)\\.(\\d+)\\.(\\d+))")
+    private val tagPattern = Pattern.compile("refs/tags/(v(\\d+)\\.(\\d+)\\.(\\d+))")
     private val typePattern = Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*:\\s*)?(?<D>.*)")
 
     fun getTags(): List<VersionTag> {
         return git.tagList()
-                .call()
-                .asSequence()
-                .sortedByDescending { ref -> repository.parseCommit(ref.getSafeObjectId()).commitTime }
-                .map { r: Ref ->
-                    val m = pattern.matcher(r.name)
-                    logger.debug { "Found tag: '$r'" + (if (m.matches()) "" else " Non conventional tag, will be ignored for release auto naming") }
-                    if (m.matches()) VersionTag(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), r.name)
-                    else VersionTag(r.name)
-                }
+            .call()
+            .asSequence()
+            .sortedByDescending { ref -> repository.parseCommit(ref.getSafeObjectId()).commitTime }
+            .map { r: Ref ->
+                val m = tagPattern.matcher(r.name)
+                logger.debug { "Found tag: '$r'" + (if (m.matches()) "" else " Non conventional tag, will be ignored for release auto naming") }
+                if (m.matches()) VersionTag(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), r.name)
+                else VersionTag(r.name)
+            }
 //                .filter { (_, m) -> m.matches() }
 //                .map { (r, m) -> VersionTag( m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt()) }
-                .toList()
+            .toList()
     }
 
     fun getTagRef(tagName: String): VersionTag {
         return VersionTag(git.tagList()
-                .call()
-                .asSequence()
-                .filter { t -> t.name == tagName }
-                .map { t -> t.name }
-                .first())
+                              .call()
+                              .asSequence()
+                              .filter { t -> t.name == tagName }
+                              .map { t -> t.name }
+                              .first())
         // TODO: manage if not found.
     }
 
@@ -97,21 +100,21 @@ class GitService(private val baseDir: File? = null) {
 
         val log = git.log()
         val commits = log.addRange(from, to)
-                .call()
-                .map { rm ->
-                    logger.debug { rm.shortMessage }
-                    val matcher = typePattern.matcher(rm.shortMessage)
-                    if (matcher.matches()) {
-                        CommitDesc(CommitType.of(matcher.group("T")),
-                                   matcher.group("C"),
-                                   matcher.group("D"),
-                                   null,
-                                   rm.id.abbreviate(8).name())
-                    } else {
-                        CommitDesc(CommitType.UNKNOWN, null, rm.shortMessage, null, rm.id.toString())
-                    }
-                }.groupBy { it.type }
-                .toSortedMap(CommitType.sortByPrio)
+            .call()
+            .map { rm ->
+                logger.debug { rm.shortMessage }
+                val matcher = typePattern.matcher(rm.shortMessage)
+                if (matcher.matches()) {
+                    CommitDesc(CommitType.of(matcher.group("T")),
+                               matcher.group("C"),
+                               matcher.group("D"),
+                               null,
+                               rm.id.abbreviate(8).name())
+                } else {
+                    CommitDesc(CommitType.UNKNOWN, null, rm.shortMessage, null, rm.id.abbreviate(8).name())
+                }
+            }.groupBy { it.type }
+            .toSortedMap(CommitType.sortByPrio)
         val parseCommit = repository.parseCommit(to)
         val authorDate = parseCommit.authorIdent.getWhen()
         val authorTimeZone = parseCommit.authorIdent.timeZone.toZoneId()
@@ -130,7 +133,7 @@ class GitService(private val baseDir: File? = null) {
     }
 
     fun getGitRemoteUrl(): String? {
-        return repository.config.getString("remote", "origin", "url")
+        return repository.config.getString("remote", "origin", "url")?.replace("\\.git\$".toRegex(), "")
     }
 
     fun parseCommit(relName: String, tags: List<VersionTag>, releaseCount: Int): List<Release> {

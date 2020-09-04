@@ -4,8 +4,9 @@
 {{/header}}
 {{#releases}}{{#-first}}#{{/-first}}{{^-first}}##{{/-first}} {{name}} ({{#date}}{{this}}{{/date}})
 {{#categories}}{{#entrySet}}### {{key}}
-{{#value}}* {{#component}}**{{.}}:** {{/component}}{{description}}. {{#trackerId}}[{{trackerUrl}}{{this}}]{{/trackerId}} {{#commitId}}({{this}}){{/commitId}}
+{{#value}}* {{#component}}**{{.}}:** {{/component}}{{description}}. {{#trackerId}}[{{trackerUrl}}{{this}}]{{/trackerId}} {{#commitId}}([{{this}}]({{gitUrl}}/commit/{{this}})){{/commitId}}
 {{/value}}
+
 {{/entrySet}}
 {{/categories}}
 

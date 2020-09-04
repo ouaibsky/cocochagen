@@ -41,5 +41,11 @@ data class CommitDesc(val type: CommitType,
                       val description: String,
                       val trackerId: String?,
                       val commitId: String);
+
 data class Release(val name: String, val date: LocalDate, val categories: Map<String, List<CommitDesc>>)
-data class Releases(val releases: List<Release>, val gitUrl: String?, val trackerUrl: String?)
+
+data class Releases(val releases: List<Release>,
+                    val gitUrl: String?,
+                    val trackerUrl: String?,
+                    val header: String? = null,
+                    val footer: String? = null)

@@ -5,6 +5,9 @@ import mu.KLogging
 import org.icroco.cococha.git.GitService
 import org.icroco.cococha.git.VersionTag
 import java.io.InputStreamReader
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 
 data class GeneratorParams(val releaseName: String?,
                            val outputFile: String?,
@@ -28,14 +31,22 @@ class ChangelogGenerator(val params: GeneratorParams) {
 
         val relName = buildReleaseName(params.releaseName, tags)
         logger.debug { "Release name is: '$relName'" }
-        val template = Mustache.compiler().compile(InputStreamReader(ChangelogGenerator.javaClass.getResourceAsStream(("/CHANGELOG.mustache"))))
+        val template = Mustache.compiler()
+            .compile(InputStreamReader(ChangelogGenerator.javaClass.getResourceAsStream(("/CHANGELOG.mustache"))))
         val releases = gitService.parseCommit(relName, tags, params.releaseCount)
         val md = template.execute(Releases(releases,
                                            params.gitRemoteUrl ?: gitService.getGitRemoteUrl(),
                                            params.trackerUrl))
-        println("---------------------------------")
-        println(md)
-        println("---------------------------------")
+        if (params.outputFile == null) {
+            println("--------------- CHANGELOG BEGIN ------------------")
+            println(md)
+            println("----------------CHANGELOG END -----------------")
+        } else {
+            Files.writeString(Paths.get(params.outputFile),
+                              md,
+                              StandardOpenOption.CREATE,
+                              StandardOpenOption.TRUNCATE_EXISTING)
+        }
     }
 
     private fun buildReleaseName(relName: String?, tags: List<VersionTag>): String {
