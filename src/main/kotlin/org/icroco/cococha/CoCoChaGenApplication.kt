@@ -1,11 +1,6 @@
 package org.icroco.cococha
 
 import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.LoggerContext
-import ch.qos.logback.core.util.StatusPrinter
-import org.icroco.cococha.git.GitService
-import org.icroco.cococha.git.SemanticVersion
-import org.slf4j.LoggerFactory
 import picocli.CommandLine
 import java.util.*
 
@@ -53,12 +48,12 @@ class CoCoChaCmd() : Runnable {
         "Default value is '\${DEFAULT-VALUE}'"], split = ",")
     private var commitType: List<String> = listOf("feat,fix")
 
-    @CommandLine.Option(names = ["-l", "--list-tags"], defaultValue = "false", description = ["Filter only those commits type",
-        "Default value is '\${DEFAULT-VALUE}'"])
-    private var listTag: Boolean = false
+//    @CommandLine.Option(names = ["-f", "--from-tag"], description = ["Start changelog generation from this tag"])
+//    private var fromTag: String? = null
 
-    @CommandLine.Option(names = ["-s", "--start-tag"], description = ["Tag to start looking commits"])
-    private var startTag: String? = null
+    @CommandLine.Option(names = ["-n", "--release-name"], description = ["Provide the name of this release",
+        "By default is automatically computed if you follow semantic versioning"])
+    private var releaseName: String? = null
 
     @CommandLine.Option(names = ["-v", "--verbose"], required = false, description = ["print more information on console",
         "Default value is '\${DEFAULT-VALUE}'"])
@@ -70,14 +65,9 @@ class CoCoChaCmd() : Runnable {
             val l = org.slf4j.LoggerFactory.getLogger(javaClass.packageName) as ch.qos.logback.classic.Logger
             l.level = Level.DEBUG
         }
-        val gitService = GitService()
 
-        val tags = gitService.getSemanticVersionTag()
-        if (listTag) {
-            tags.forEach { println(it) }
-        }
-        val semVer = if (startTag == null) tags.first() else (SemanticVersion(startTag!!))
-        println("StartTag: $semVer")
+        val params = GeneratorParams(releaseName,outputFile, releaseCount, commitType.map { CommitType.of(it) })
+        ChangelogGenerator(params).run()
     }
 }
 //

@@ -14,21 +14,25 @@ enum class CommitType(val displayPriority: Int, val prefix: String, val fullName
     PERFORMANCE(2, "perf", "Performance Improvements"),
     STYLE(10, "style", "Styles"),
     REVERT(3, "revert", "Reverts"),
-    REFACTOR(4, "refactor", "Code Refactoring");
+    REFACTOR(4, "refactor", "Code Refactoring"),
+    UNKNOWN(4, "unknown", "Unknown commit type");
 
     companion object {
-        fun of(value: String): CommitType {
+        public fun of(value: String, defaultValue: CommitType? = null): CommitType {
             for (type in values()) {
-                if (type.prefix == value) {
+                if (type.prefix.equals(value, true)) {
                     return type
                 }
             }
-            throw IllegalStateException(
-                    value + " commit type is not supported by " + CommitType::class.java.simpleName)
+            return defaultValue ?: throw IllegalStateException("Unknown commit type: '$value'. values: '${CommitType.buildPattern()}'")
         }
+        fun buildPattern(): String {
+            return "${values().joinToString("|") { it.prefix }}"
+        }
+
+        val sortByPrio = compareBy<CommitType>() { it.displayPriority}
     }
 }
-data class CommitDesc(val component: String, val description: String, val trackerId: String, val commitId: String);
-data class Category(val type: CommitType, val cards: List<CommitDesc>)
-data class Release(val date: LocalDate, val categories: List<Category>)
+data class CommitDesc(val type: CommitType, val component: String?, val description: String, val trackerId: String?, val commitId: String);
+data class Release(val name: String, val date: LocalDate, val categories: Map<CommitType, List<CommitDesc>>)
 data class Releases(val releases: List<Release>)
