@@ -31,8 +31,9 @@ class PropertiesVersionProvider : CommandLine.IVersionProvider {
 }
 
 @CommandLine.Command(name = "cococha",
-        mixinStandardHelpOptions = true,
-        description = ["@|bold Conventional Commit Changelog|@ @|underline Generator|@", ""], versionProvider = PropertiesVersionProvider::class
+                     mixinStandardHelpOptions = true,
+                     description = ["@|bold Conventional Commit Changelog|@ @|underline Generator|@", ""],
+                     versionProvider = PropertiesVersionProvider::class
 )
 class CoCoChaCmd() : Runnable {
 
@@ -40,12 +41,17 @@ class CoCoChaCmd() : Runnable {
         "Default value is '\${DEFAULT-VALUE}'"], defaultValue = "CHANGELOG.md")
     private var outputFile = "CHANGELOG.md"
 
-    @CommandLine.Option(names = ["-c", "--release-count"], defaultValue = "1", description = ["Number of last releases to include into this changelog.",
-        " default is '\${DEFAULT-VALUE}'"])
+    @CommandLine.Option(names = ["-c", "--release-count"],
+                        defaultValue = "1",
+                        description = ["Number of last releases to include into this changelog.",
+                            " default is '\${DEFAULT-VALUE}'"])
     private var releaseCount = 1
 
-    @CommandLine.Option(names = ["-t", "--commit-type"], defaultValue = "feat,fix", description = ["Filter only those commits type",
-        "Default value is '\${DEFAULT-VALUE}'"], split = ",")
+    @CommandLine.Option(names = ["-t", "--commit-type"],
+                        defaultValue = "feat,fix",
+                        description = ["Filter only those commits type",
+                            "Default value is '\${DEFAULT-VALUE}'"],
+                        split = ",")
     private var commitType: List<String> = listOf("feat,fix")
 
 //    @CommandLine.Option(names = ["-f", "--from-tag"], description = ["Start changelog generation from this tag"])
@@ -55,8 +61,18 @@ class CoCoChaCmd() : Runnable {
         "By default is automatically computed if you follow semantic versioning"])
     private var releaseName: String? = null
 
-    @CommandLine.Option(names = ["-v", "--verbose"], required = false, description = ["print more information on console",
-        "Default value is '\${DEFAULT-VALUE}'"])
+    @CommandLine.Option(names = ["-u", "--tracker-url"], description = ["Tracker URL (Jira. github ...)",
+        "If a card id is found is will be tail at the end"])
+    private var trackerUrl: String? = null
+
+    @CommandLine.Option(names = ["-r", "--remote-url"], description = ["Git Remote URL (github, gitlab ...)",
+        "Remote url to add commit link"])
+    private var gitRemoteUrl: String? = null
+
+    @CommandLine.Option(names = ["-v", "--verbose"],
+                        required = false,
+                        description = ["print more information on console",
+                            "Default value is '\${DEFAULT-VALUE}'"])
     private var verbose: Boolean = false
 
     override fun run() {
@@ -66,7 +82,12 @@ class CoCoChaCmd() : Runnable {
             l.level = Level.DEBUG
         }
 
-        val params = GeneratorParams(releaseName,outputFile, releaseCount, commitType.map { CommitType.of(it) })
+        val params = GeneratorParams(releaseName,
+                                     outputFile,
+                                     releaseCount,
+                                     commitType.map { CommitType.of(it) },
+                                     gitRemoteUrl,
+                                     trackerUrl)
         ChangelogGenerator(params).run()
     }
 }

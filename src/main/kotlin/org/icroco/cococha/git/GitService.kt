@@ -3,13 +3,10 @@ package org.icroco.cococha.git
 import mu.KLogging
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.*
-import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.revwalk.RevTag
-import org.eclipse.jgit.revwalk.RevWalk
-import org.icroco.cococha.*
+import org.icroco.cococha.CommitDesc
+import org.icroco.cococha.CommitType
+import org.icroco.cococha.Release
 import java.io.File
-import java.lang.IllegalArgumentException
-import java.time.LocalDate
 import java.util.regex.Pattern
 
 
@@ -30,7 +27,7 @@ data class VersionTag(val major: Int, val minor: Int, val build: Int, val tagNam
     }
 
     override fun toString(): String {
-        return if (isSemantic()) "v$major.$minor.$build" else tagName!!
+        return if (isSemantic()) "v$major.$minor.$build" else tagName!!.removePrefix("/refs/tags/")
     }
 
     override fun compareTo(other: VersionTag): Int {
@@ -105,30 +102,52 @@ class GitService(private val baseDir: File? = null) {
                     logger.debug { rm.shortMessage }
                     val matcher = typePattern.matcher(rm.shortMessage)
                     if (matcher.matches()) {
-                        CommitDesc(CommitType.of(matcher.group("T")), matcher.group("C"), matcher.group("D"), null, rm.id.abbreviate(8).name())
+                        CommitDesc(CommitType.of(matcher.group("T")),
+                                   matcher.group("C"),
+                                   matcher.group("D"),
+                                   null,
+                                   rm.id.abbreviate(8).name())
                     } else {
                         CommitDesc(CommitType.UNKNOWN, null, rm.shortMessage, null, rm.id.toString())
                     }
                 }.groupBy { it.type }
                 .toSortedMap(CommitType.sortByPrio)
-        return Release(releaseName, LocalDate.now(), commits)
+        val parseCommit = repository.parseCommit(to)
+        val authorDate = parseCommit.authorIdent.getWhen()
+        val authorTimeZone = parseCommit.authorIdent.timeZone.toZoneId()
+        return Release(releaseName,
+                       authorDate.toInstant().atZone(authorTimeZone).toLocalDate(),
+                       commits.mapKeys { it.key.fullName })
     }
 
     fun getCommitRange(releaseName: String, from: Ref): Release {
         return getCommitRange(releaseName, from.getSafeObjectId(), repository.resolve(Constants.HEAD))
     }
 
-    fun getOldLog(): ObjectId {
-        return git.log().setMaxCount(1000).call().first()
+    private fun getOldLog(): ObjectId {
+        val call = git.log().setMaxCount(1000).call()
+        return call.last()
     }
 
-    fun parseCommit(tags: List<VersionTag>): List<Release> {
+    fun getGitRemoteUrl(): String? {
+        return repository.config.getString("remote", "origin", "url")
+    }
+
+    fun parseCommit(relName: String, tags: List<VersionTag>, releaseCount: Int): List<Release> {
         var to = repository.resolve(Constants.HEAD)
+        var name = relName
         val releases = mutableListOf<Release>()
         for (t in tags) {
             val from = repository.resolve(t.tagName)
-            releases.add(getCommitRange(t.toString(), from, to))
+            releases.add(getCommitRange(name, from, to))
             to = from
+            name = t.toString()
+        }
+        if (tags.isEmpty() || releases.size < releaseCount) {
+            val from = getOldLog()
+            name = if (tags.isEmpty()) relName else tags.last().toString()
+            releases.add(getCommitRange(name, from, to))
+            // FIXME: first commit of git history is omitted
         }
 
         return releases

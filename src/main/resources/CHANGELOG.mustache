@@ -1,15 +1,16 @@
 {{#header}}
-{{this}}
+    {{this}}
 
 {{/header}}
-{{#releases}}
-    {{#-first}}# {{/-first}}{{^-first}}## {{/-first}} {{relName}} ({{#relDate}}{{this}}{{/relDate}})
-{{#categories}}## {{type.fullName}}
-{{#cards}}
-    * {{#component}}**this: **{{/component}}{{description}}. {{#trackerId}}{{trackerUrl}}{{this}}{{/trackerId}}
-{{/cards}}
+{{#releases}}{{#-first}}#{{/-first}}{{^-first}}##{{/-first}} {{name}} ({{#date}}{{this}}{{/date}})
+{{#categories}}{{#entrySet}}### {{key}}
+{{#value}}* {{#component}}**{{.}}:** {{/component}}{{description}}. {{#trackerId}}[{{trackerUrl}}{{this}}]{{/trackerId}} {{#commitId}}({{this}}){{/commitId}}
+{{/value}}
+{{/entrySet}}
 {{/categories}}
+
 {{/releases}}
 {{#footer}}
+
     {{this}}
 {{/footer}}
