@@ -1,11 +1,11 @@
 {{#header}}
-    {{this}}
+{{this}}
 
 {{/header}}
 {{#releases}}{{#-first}}#{{/-first}}{{^-first}}##{{/-first}} {{name}} ({{#date}}{{this}}{{/date}})
-{{#categories}}{{#entrySet}}### {{key}}
-{{#value}}* {{#component}}**{{.}}:** {{/component}}{{description}}. {{#trackerId}}[{{trackerUrl}}{{this}}]{{/trackerId}} {{#commitId}}([{{this}}]({{gitUrl}}/commit/{{this}})){{/commitId}}
-{{/value}}
+{{#categories}}{{#entrySet}}### {{getKey}}
+{{#getValue}}* {{#component}}**{{.}}:** {{/component}}{{description}}. {{#trackerId}}[{{trackerUrl}}{{this}}]{{/trackerId}} {{#commitId}}([{{this}}]({{gitUrl}}/commit/{{this}})){{/commitId}}
+{{/getValue}}
 
 {{/entrySet}}
 {{/categories}}

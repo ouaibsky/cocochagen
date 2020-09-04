@@ -162,6 +162,7 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>org.icroco.cococha.CoCoChaGenApplication</mainClass>
+                    <executable>true</executable>
                 </configuration>
                 <executions>
                     <execution>

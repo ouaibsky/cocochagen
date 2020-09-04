@@ -2,6 +2,7 @@ package org.icroco.cococha
 
 import ch.qos.logback.classic.Level
 import picocli.CommandLine
+import java.nio.file.Path
 import java.util.*
 
 
@@ -43,16 +44,18 @@ class CoCoChaCmd() : Runnable {
 
     @CommandLine.Option(names = ["-c", "--release-count"],
                         defaultValue = "1",
-                        description = ["Number of last releases to include into this changelog.",
-                            " default is '\${DEFAULT-VALUE}'"])
+                        description = ["Last N releases to include into this changelog.",
+                            "Default is '\${DEFAULT-VALUE}'"])
     private var releaseCount = 1
 
     @CommandLine.Option(names = ["-t", "--commit-type"],
-                        defaultValue = "feat,fix",
+                        defaultValue = "fix,feat,perf",
                         description = ["Filter only those commits type",
                             "Default value is '\${DEFAULT-VALUE}'"],
                         split = ",")
-    private var commitType: List<String> = listOf("feat,fix")
+    private var commitType: List<String> = listOf(CommitType.BUG_FIX.prefix,
+                                                  CommitType.FEAT.prefix,
+                                                  CommitType.PERFORMANCE.prefix)
 
 //    @CommandLine.Option(names = ["-f", "--from-tag"], description = ["Start changelog generation from this tag"])
 //    private var fromTag: String? = null
@@ -61,9 +64,13 @@ class CoCoChaCmd() : Runnable {
         "By default is automatically computed if you follow semantic versioning"])
     private var releaseName: String? = null
 
-    @CommandLine.Option(names = ["-t", "--tracker-url"], description = ["Tracker URL (Jira. github ...)",
+    @CommandLine.Option(names = ["-T", "--tracker-url"], description = ["Tracker URL (Jira. github ...)",
         "If a card id is found is will be tail at the end"])
     private var trackerUrl: String? = null
+
+    @CommandLine.Option(names = ["-F", "--template-file"], description = ["Template file path",
+        "Used to override the default changelog template. We use Mustache engine."])
+    private var template: Path? = null
 
     @CommandLine.Option(names = ["-g", "--git-remote-url"], description = ["Git Remote URL (github, gitlab ...)",
         "Remote url to add commit link"])
@@ -82,7 +89,8 @@ class CoCoChaCmd() : Runnable {
             l.level = Level.DEBUG
         }
 
-        val params = GeneratorParams(releaseName,
+        val params = GeneratorParams(template,
+                                     releaseName,
                                      outputFile,
                                      releaseCount,
                                      if (commitType.equals("*")) CommitType.values().toList()

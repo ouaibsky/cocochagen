@@ -4,35 +4,56 @@ import com.samskivert.mustache.Mustache
 import mu.KLogging
 import org.icroco.cococha.git.GitService
 import org.icroco.cococha.git.VersionTag
+import java.io.FileReader
 import java.io.InputStreamReader
+import java.io.Reader
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
-data class GeneratorParams(val releaseName: String?,
+data class GeneratorParams(var template: Path?,
+                           var releaseName: String?,
                            val outputFile: String?,
                            val releaseCount: Int = 1,
                            val filterCommitType: List<CommitType> = listOf(CommitType.BUG_FIX,
                                                                            CommitType.FEAT,
                                                                            CommitType.PERFORMANCE),
                            val gitRemoteUrl: String? = null,
-                           val trackerUrl: String? = null)
+                           val trackerUrl: String? = null) {
+    fun getTemplateReader(): Reader {
+        val t = template?.let {
+            if (!Files.exists(it)) {
+                throw IllegalArgumentException("Template file doesn't exist: '$it'")
+            }
+            it
+        }
+        return if (t == null) InputStreamReader(ChangelogGenerator::class.java.getResourceAsStream(("/CHANGELOG.mustache")))
+        else FileReader(t.toFile())
+    }
+}
 
 class ChangelogGenerator(val params: GeneratorParams) {
     private companion object : KLogging()
+
     private val gitService = GitService()
 
     fun run() {
+        params.template = params.template?.let {
+            if (!Files.exists(it)) {
+                throw IllegalArgumentException("Template file doesn't exist: '$it'")
+            }
+            it
+        }
         var tags = gitService.getTags()
         if (params.releaseCount >= 1) {
             tags = tags.take(params.releaseCount)
         }
 
-        val relName = buildReleaseName(params.releaseName, tags)
-        logger.debug { "Release name is: '$relName'" }
-        val template = Mustache.compiler()
-            .compile(InputStreamReader(ChangelogGenerator::class.java.getResourceAsStream(("/CHANGELOG.mustache"))))
-        val releases = gitService.parseCommit(relName, tags, params.releaseCount)
+        params.releaseName = buildReleaseName(params.releaseName, tags)
+        logger.debug { "Release name is: '${params.releaseName}'" }
+        val template = Mustache.compiler().compile(params.getTemplateReader())
+        val releases = gitService.parseCommit(params.releaseName!!, tags, params.releaseCount)
         val md = template.execute(Releases(releases,
                                            params.gitRemoteUrl ?: gitService.getGitRemoteUrl(),
                                            params.trackerUrl))
