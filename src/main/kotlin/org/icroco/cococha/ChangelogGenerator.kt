@@ -20,7 +20,6 @@ data class GeneratorParams(val releaseName: String?,
 
 class ChangelogGenerator(val params: GeneratorParams) {
     private companion object : KLogging()
-
     private val gitService = GitService()
 
     fun run() {
@@ -32,7 +31,7 @@ class ChangelogGenerator(val params: GeneratorParams) {
         val relName = buildReleaseName(params.releaseName, tags)
         logger.debug { "Release name is: '$relName'" }
         val template = Mustache.compiler()
-            .compile(InputStreamReader(ChangelogGenerator.javaClass.getResourceAsStream(("/CHANGELOG.mustache"))))
+            .compile(InputStreamReader(ChangelogGenerator::class.java.getResourceAsStream(("/CHANGELOG.mustache"))))
         val releases = gitService.parseCommit(relName, tags, params.releaseCount)
         val md = template.execute(Releases(releases,
                                            params.gitRemoteUrl ?: gitService.getGitRemoteUrl(),
@@ -47,6 +46,7 @@ class ChangelogGenerator(val params: GeneratorParams) {
                               StandardOpenOption.CREATE,
                               StandardOpenOption.TRUNCATE_EXISTING)
         }
+        logger.info { "Generation finished: ${params.outputFile}" }
     }
 
     private fun buildReleaseName(relName: String?, tags: List<VersionTag>): String {

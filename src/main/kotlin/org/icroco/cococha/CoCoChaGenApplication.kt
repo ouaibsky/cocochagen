@@ -61,11 +61,11 @@ class CoCoChaCmd() : Runnable {
         "By default is automatically computed if you follow semantic versioning"])
     private var releaseName: String? = null
 
-    @CommandLine.Option(names = ["-u", "--tracker-url"], description = ["Tracker URL (Jira. github ...)",
+    @CommandLine.Option(names = ["-t", "--tracker-url"], description = ["Tracker URL (Jira. github ...)",
         "If a card id is found is will be tail at the end"])
     private var trackerUrl: String? = null
 
-    @CommandLine.Option(names = ["-r", "--remote-url"], description = ["Git Remote URL (github, gitlab ...)",
+    @CommandLine.Option(names = ["-g", "--git-remote-url"], description = ["Git Remote URL (github, gitlab ...)",
         "Remote url to add commit link"])
     private var gitRemoteUrl: String? = null
 
@@ -85,7 +85,8 @@ class CoCoChaCmd() : Runnable {
         val params = GeneratorParams(releaseName,
                                      outputFile,
                                      releaseCount,
-                                     commitType.map { CommitType.of(it) },
+                                     if (commitType.equals("*")) CommitType.values().toList()
+                                     else commitType.map { CommitType.of(it) },
                                      gitRemoteUrl,
                                      trackerUrl)
         ChangelogGenerator(params).run()
