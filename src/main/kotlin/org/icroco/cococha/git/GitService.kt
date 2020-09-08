@@ -93,7 +93,8 @@ class GitService(baseDir: File? = null) {
     private fun getCommitRange(releaseName: String,
                                from: ObjectId,
                                to: ObjectId,
-                               filterCommitType: List<CommitType>): Release {
+                               filterCommitType: List<CommitType>,
+                               trackerIdRegex: Pattern): Release {
 
 //        val rw = RevWalk(repository)
 //        val ro = rw.parseCommit(from)
@@ -106,12 +107,24 @@ class GitService(baseDir: File? = null) {
             .mapNotNull { rm ->
                 logger.debug { "Found commit log: '${rm.shortMessage}'" }
                 val matcher = typePattern.matcher(rm.shortMessage)
+
                 if (matcher.matches()) {
-                    val desc = matcher.group("D")
+                    var desc = matcher.group("D")
+                    desc = if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc.trim()
+                    desc = if (desc.endsWith(".")) desc else "$desc."
+                    val smId = trackerIdRegex.matcher(rm.shortMessage)
+                    // TODO: Manage many issue
+                    val issueId: String? = if (smId.matches()) {
+                        desc = desc.replace(smId.group("R"), "")
+                        smId.group("ID")
+                    } else {
+                        val fmId = trackerIdRegex.matcher(rm.fullMessage)
+                        if (fmId.matches()) fmId.group("ID") else null
+                    }
                     CommitDesc(CommitType.of(matcher.group("T")),
                                matcher.group("C")?.replace("_", " "),
-                               if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc.trim(),
-                               null,
+                               desc,
+                               issueId,
                                rm.id.abbreviate(8).name())
                 } else {
                     CommitDesc(CommitType.UNKNOWN, null, rm.shortMessage, null, rm.id.abbreviate(8).name())
@@ -149,20 +162,21 @@ class GitService(baseDir: File? = null) {
     fun parseCommit(relName: String,
                     tags: List<VersionTag>,
                     releaseCount: Int,
-                    filterCommitType: List<CommitType>): List<Release> {
+                    filterCommitType: List<CommitType>,
+                    trackerIdRegex: Pattern): List<Release> {
         var to = repository.resolve(Constants.HEAD)
         var name = relName
         val releases = mutableListOf<Release>()
         for (t in tags) {
             val from = repository.refDatabase.peel(t.ref).getSafeObjectId()
-            releases.add(getCommitRange(name, from, to, filterCommitType))
+            releases.add(getCommitRange(name, from, to, filterCommitType, trackerIdRegex))
             to = from
             name = t.toString()
         }
         if (tags.isEmpty() || releases.size < releaseCount) {
             val from = getOldLog()
             name = if (tags.isEmpty()) relName else tags.last().toString()
-            releases.add(getCommitRange(name, from, to, filterCommitType))
+            releases.add(getCommitRange(name, from, to, filterCommitType, trackerIdRegex))
             // FIXME: first commit of git history is omitted
         }
 

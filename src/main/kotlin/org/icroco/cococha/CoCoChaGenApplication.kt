@@ -80,10 +80,10 @@ class CoCoChaCmd : Runnable {
         "   First one named: 'R' is the global one used for link substitution ",
         "   Second one name 'ID' is used to append to issueUrl",
         " Example:",
-        "    git: \"(?<R>#(?<ID>\\\\d+))\"",
+        "    git: \"(?<R>#(?<ID>\\\\d+))\", git conventional commit: (?<R>(Closes:\\s*)?)#(?<ID>\\d+)",
         "    jira: \"(?<R>JIRA-(?<ID>\\\\d+))\"",
         "Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html"])
-    private var issueIdRegex: String? = "(?<R>#(?<ID>\\d+))"
+    private var issueIdRegex: String = "(?<R>([Cc][Ll][Oo][Ss][Ee][Ss]\\s*:\\s*)?#(?<ID>\\d+))"
 
     @CommandLine.Option(names = ["-F", "--template-file"], description = ["Template file path",
         "Used to override the default changelog template. We use Mustache engine."])
@@ -124,7 +124,7 @@ class CoCoChaCmd : Runnable {
                                      gitCommitUrl,
                                      issueLink,
                                      issueUrl,
-                                     if (issueIdRegex == null) null else Pattern.compile(issueIdRegex!!))
+                                     Pattern.compile(".*$issueIdRegex.*", Pattern.DOTALL))
         ChangelogGenerator(params).run()
     }
 }

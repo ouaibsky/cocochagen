@@ -24,7 +24,7 @@ data class GeneratorParams(var template: Path?,
                            val gitCommitUrl: String? = null,
                            val addIssueLink: Boolean = true,
                            val trackerUrl: String? = null,
-                           val trackerIdRegex: Pattern? = null) {
+                           val trackerIdRegex: Pattern) {
     fun getTemplateReader(): Reader {
         val t = template?.let {
             if (!Files.exists(it)) {
@@ -66,7 +66,11 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         logger.info { "Issue tracker URL: '${if (params.addIssueLink) (trackerUrl ?: "None") else "Disabled"}'" }
         logger.info { "Issue ID Regex: '${params.trackerIdRegex?.pattern() ?: "None"}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
-        val releases = gitService.parseCommit(params.releaseName!!, tags, params.releaseCount, params.filterCommitType)
+        val releases = gitService.parseCommit(params.releaseName!!,
+                                              tags,
+                                              params.releaseCount,
+                                              params.filterCommitType,
+                                              params.trackerIdRegex)
         val md = template.execute(Releases(releases, gitUrl, trackerUrl))
 
         if (params.outputFile == null) {
