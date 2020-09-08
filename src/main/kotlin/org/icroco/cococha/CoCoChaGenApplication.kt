@@ -72,10 +72,10 @@ class CoCoChaCmd : Runnable {
         "Used to override the default changelog template. We use Mustache engine."])
     private var template: Path? = null
 
-    @CommandLine.Option(names = ["-a", "-add-commit-link"],
+    @CommandLine.Option(names = ["-l", "--no-commit-link"], negatable = true, defaultValue = "false",
                         description = ["Append git commit URL for change log  (github, gitlab ...)",
                             "Default value is '\${DEFAULT-VALUE}'"])
-    private var addCommitLink: Boolean = true
+    private var noCommitLink: Boolean = false
 
     @CommandLine.Option(names = ["-g", "--git-commit-url"],
                         description = [
@@ -103,7 +103,7 @@ class CoCoChaCmd : Runnable {
                                      releaseCount,
                                      if (commitType.equals("*")) CommitType.values().toList()
                                      else commitType.map { CommitType.of(it) },
-                                     addCommitLink,
+                                     noCommitLink,
                                      gitCommitUrl,
                                      trackerUrl,
                                      null)

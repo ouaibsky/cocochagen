@@ -15,7 +15,7 @@ enum class CommitType(val displayPriority: Int, val prefix: String, val fullName
     STYLE(10, "style", "Styles"),
     REVERT(3, "revert", "Reverts"),
     REFACTOR(4, "refactor", "Code Refactoring"),
-    UNKNOWN(4, "unknown", "Unknown commit type");
+    UNKNOWN(4, "unknown", "Others");
 
     companion object {
         public fun of(value: String, defaultValue: CommitType? = null): CommitType {
@@ -25,11 +25,11 @@ enum class CommitType(val displayPriority: Int, val prefix: String, val fullName
                 }
             }
             return defaultValue
-                    ?: throw IllegalStateException("Unknown commit type: '$value'. values: '${CommitType.buildPattern()}'")
+                    ?: throw IllegalStateException("Unknown commit type: '$value'. values: '${buildPattern()}'")
         }
 
         fun buildPattern(): String {
-            return "${values().joinToString("|") { it.prefix }}"
+            return values().joinToString("|") { it.prefix }
         }
 
         val sortByPrio = compareBy<CommitType>() { it.displayPriority }

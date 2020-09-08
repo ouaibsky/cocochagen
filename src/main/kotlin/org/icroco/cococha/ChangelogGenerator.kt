@@ -20,7 +20,7 @@ data class GeneratorParams(var template: Path?,
                            val filterCommitType: List<CommitType> = listOf(CommitType.BUG_FIX,
                                                                            CommitType.FEAT,
                                                                            CommitType.PERFORMANCE),
-                           val addCommitLink: Boolean = true,
+                           val noCommitLink: Boolean = false,
                            val gitCommitUrl: String? = null,
                            val trackerUrl: String? = null,
                            val trackerIdRegex: Pattern? = null) {
@@ -54,11 +54,10 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         }
 
         params.releaseName = buildReleaseName(params.releaseName, tags)
-        val gitUrl = if (params.addCommitLink) params.gitCommitUrl
-                ?: gitService.getGitRemoteUrl() else null
+        val gitUrl = if (params.noCommitLink) null else params.gitCommitUrl ?: gitService.getGitRemoteUrl()
         logger.info { "Release name is: '${params.releaseName}'" }
         logger.info { "Filter commit log with: '${params.filterCommitType.map { it.prefix }.joinToString(",")}'" }
-        logger.info { "Git issue URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
+        logger.info { "Git issue URL: '${if (params.noCommitLink) gitUrl else "Disabled"}'" }
         logger.info { "Tracker URL: '${params.trackerUrl ?: "None"}'" }
         logger.info { "Tracker Regex: '${params.trackerIdRegex?.pattern() ?: "None"}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
