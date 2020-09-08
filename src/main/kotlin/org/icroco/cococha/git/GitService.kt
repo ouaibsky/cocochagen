@@ -63,7 +63,7 @@ class GitService(baseDir: File? = null) {
         .build()
     private val git = Git(repository)
     private val tagPattern = Pattern.compile("refs/tags/(v(\\d+)\\.(\\d+)\\.(\\d+))")
-    private val typePattern = Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*:\\s*)?(?<D>.*)")
+    private val typePattern = Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*)?:\\s*(?<D>.*)")
 
     fun getTags(): List<VersionTag> {
         return git.tagList()
@@ -104,9 +104,10 @@ class GitService(baseDir: File? = null) {
                 logger.debug { "Found commit log: '${rm.shortMessage}'" }
                 val matcher = typePattern.matcher(rm.shortMessage)
                 if (matcher.matches()) {
+                    val desc = matcher.group("D")
                     CommitDesc(CommitType.of(matcher.group("T")),
-                               matcher.group("C"),
-                               matcher.group("D"),
+                               matcher.group("C").replace("_", " "),
+                               if (desc.isBlank()) rm.fullMessage.lines().first() else desc.trim(),
                                null,
                                rm.id.abbreviate(8).name())
                 } else {
@@ -114,6 +115,7 @@ class GitService(baseDir: File? = null) {
                 }
             }.groupBy { it.type }
             .toSortedMap(CommitType.sortByPrio)
+            .mapValues { e -> e.value.sortedBy { it.component } } // TODO: remove duplicate Desc / Tracker
         val parseCommit = repository.parseCommit(to)
         val authorDate = parseCommit.authorIdent.getWhen()
         val authorTimeZone = parseCommit.authorIdent.timeZone.toZoneId()
