@@ -90,7 +90,10 @@ class GitService(baseDir: File? = null) {
         // TODO: manage if not found.
     }
 
-    private fun getCommitRange(releaseName: String, from: ObjectId, to: ObjectId): Release {
+    private fun getCommitRange(releaseName: String,
+                               from: ObjectId,
+                               to: ObjectId,
+                               filterCommitType: List<CommitType>): Release {
 
 //        val rw = RevWalk(repository)
 //        val ro = rw.parseCommit(from)
@@ -100,22 +103,28 @@ class GitService(baseDir: File? = null) {
         val log = git.log()
         val commits = log.addRange(from, to)
             .call()
-            .map { rm ->
+            .mapNotNull { rm ->
                 logger.debug { "Found commit log: '${rm.shortMessage}'" }
                 val matcher = typePattern.matcher(rm.shortMessage)
                 if (matcher.matches()) {
                     val desc = matcher.group("D")
                     CommitDesc(CommitType.of(matcher.group("T")),
-                               matcher.group("C").replace("_", " "),
-                               if (desc.isBlank()) rm.fullMessage.lines().first() else desc.trim(),
+                               matcher.group("C")?.replace("_", " "),
+                               if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc.trim(),
                                null,
                                rm.id.abbreviate(8).name())
                 } else {
                     CommitDesc(CommitType.UNKNOWN, null, rm.shortMessage, null, rm.id.abbreviate(8).name())
                 }
-            }.groupBy { it.type }
+            }
+            .groupBy { it.type }
             .toSortedMap(CommitType.sortByPrio)
-            .mapValues { e -> e.value.sortedBy { it.component } } // TODO: remove duplicate Desc / Tracker
+            .mapValues { e ->
+                e.value
+                    .filter { cd -> filterCommitType.contains(cd.type) }
+                    .sortedBy { it.component }
+            }.filter { e -> e.value.isNotEmpty() }
+        // TODO: remove duplicate Desc / Tracker
         val parseCommit = repository.parseCommit(to)
         val authorDate = parseCommit.authorIdent.getWhen()
         val authorTimeZone = parseCommit.authorIdent.timeZone.toZoneId()
@@ -124,9 +133,9 @@ class GitService(baseDir: File? = null) {
                        commits.mapKeys { it.key.fullName })
     }
 
-    fun getCommitRange(releaseName: String, from: Ref): Release {
-        return getCommitRange(releaseName, from.getSafeObjectId(), repository.resolve(Constants.HEAD))
-    }
+//    fun getCommitRange(releaseName: String, from: Ref): Release {
+//        return getCommitRange(releaseName, from.getSafeObjectId(), repository.resolve(Constants.HEAD))
+//    }
 
     private fun getOldLog(): ObjectId {
         val call = git.log().setMaxCount(1000).call()
@@ -137,24 +146,27 @@ class GitService(baseDir: File? = null) {
         return repository.config.getString("remote", "origin", "url")?.replace("\\.git\$".toRegex(), "")
     }
 
-    fun parseCommit(relName: String, tags: List<VersionTag>, releaseCount: Int): List<Release> {
+    fun parseCommit(relName: String,
+                    tags: List<VersionTag>,
+                    releaseCount: Int,
+                    filterCommitType: List<CommitType>): List<Release> {
         var to = repository.resolve(Constants.HEAD)
         var name = relName
         val releases = mutableListOf<Release>()
         for (t in tags) {
             val from = repository.refDatabase.peel(t.ref).getSafeObjectId()
-            releases.add(getCommitRange(name, from, to))
+            releases.add(getCommitRange(name, from, to, filterCommitType))
             to = from
             name = t.toString()
         }
         if (tags.isEmpty() || releases.size < releaseCount) {
             val from = getOldLog()
             name = if (tags.isEmpty()) relName else tags.last().toString()
-            releases.add(getCommitRange(name, from, to))
+            releases.add(getCommitRange(name, from, to, filterCommitType))
             // FIXME: first commit of git history is omitted
         }
 
-        return releases
+        return releases.filter { r -> r.categories.isNotEmpty() }
     }
 
 }

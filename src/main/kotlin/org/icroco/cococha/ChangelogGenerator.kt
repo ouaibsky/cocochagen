@@ -11,6 +11,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import java.util.regex.Pattern
 
 data class GeneratorParams(var template: Path?,
                            var releaseName: String?,
@@ -19,8 +20,10 @@ data class GeneratorParams(var template: Path?,
                            val filterCommitType: List<CommitType> = listOf(CommitType.BUG_FIX,
                                                                            CommitType.FEAT,
                                                                            CommitType.PERFORMANCE),
-                           val gitRemoteUrl: String? = null,
-                           val trackerUrl: String? = null) {
+                           val addCommitLink: Boolean = true,
+                           val gitCommitUrl: String? = null,
+                           val trackerUrl: String? = null,
+                           val trackerIdRegex: Pattern? = null) {
     fun getTemplateReader(): Reader {
         val t = template?.let {
             if (!Files.exists(it)) {
@@ -51,11 +54,17 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         }
 
         params.releaseName = buildReleaseName(params.releaseName, tags)
-        logger.debug { "Release name is: '${params.releaseName}'" }
+        val gitUrl = if (params.addCommitLink) params.gitCommitUrl
+                ?: gitService.getGitRemoteUrl() else null
+        logger.info { "Release name is: '${params.releaseName}'" }
+        logger.info { "Filter commit log with: '${params.filterCommitType.map { it.prefix }.joinToString(",")}'" }
+        logger.info { "Git issue URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
+        logger.info { "Tracker URL: '${params.trackerUrl ?: "None"}'" }
+        logger.info { "Tracker Regex: '${params.trackerIdRegex?.pattern() ?: "None"}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
-        val releases = gitService.parseCommit(params.releaseName!!, tags, params.releaseCount)
+        val releases = gitService.parseCommit(params.releaseName!!, tags, params.releaseCount, params.filterCommitType)
         val md = template.execute(Releases(releases,
-                                           params.gitRemoteUrl ?: gitService.getGitRemoteUrl(),
+                                           gitUrl,
                                            params.trackerUrl))
         if (params.outputFile == null) {
             println("--------------- CHANGELOG BEGIN ------------------")

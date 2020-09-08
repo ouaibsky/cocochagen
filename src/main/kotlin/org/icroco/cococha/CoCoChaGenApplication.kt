@@ -72,9 +72,17 @@ class CoCoChaCmd : Runnable {
         "Used to override the default changelog template. We use Mustache engine."])
     private var template: Path? = null
 
-    @CommandLine.Option(names = ["-g", "--git-remote-url"], description = ["Git Remote URL (github, gitlab ...)",
-        "Remote url to add commit link"])
-    private var gitRemoteUrl: String? = null
+    @CommandLine.Option(names = ["-a", "-add-commit-link"],
+                        description = ["Append git commit URL for change log  (github, gitlab ...)",
+                            "Default value is '\${DEFAULT-VALUE}'"])
+    private var addCommitLink: Boolean = true
+
+    @CommandLine.Option(names = ["-g", "--git-commit-url"],
+                        description = [
+                            "Remote url prefix to build commit link (github, gitlab ...)",
+                            "If not provided, we try to read from git remote (origin/master).",
+                        ])
+    private var gitCommitUrl: String? = null
 
     @CommandLine.Option(names = ["-v", "--verbose"],
                         required = false,
@@ -95,8 +103,10 @@ class CoCoChaCmd : Runnable {
                                      releaseCount,
                                      if (commitType.equals("*")) CommitType.values().toList()
                                      else commitType.map { CommitType.of(it) },
-                                     gitRemoteUrl,
-                                     trackerUrl)
+                                     addCommitLink,
+                                     gitCommitUrl,
+                                     trackerUrl,
+                                     null)
         ChangelogGenerator(params).run()
     }
 }
