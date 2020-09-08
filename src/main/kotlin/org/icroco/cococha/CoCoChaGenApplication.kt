@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level
 import picocli.CommandLine
 import java.nio.file.Path
 import java.util.*
+import java.util.regex.Pattern
 
 
 class CoCoChaGenApplication {
@@ -64,18 +65,34 @@ class CoCoChaCmd : Runnable {
         "By default is automatically computed if you follow semantic versioning"])
     private var releaseName: String? = null
 
-    @CommandLine.Option(names = ["-T", "--tracker-url"], description = ["Tracker URL (Jira. github ...)",
+    @CommandLine.Option(names = ["--no-issue-link"], negatable = true, defaultValue = "true",
+                        description = ["Append an issue link if an issue ID is found into short or full log message",
+                            "Default value is '\${DEFAULT-VALUE}'"])
+    private var issueLink: Boolean = true
+
+    @CommandLine.Option(names = ["-i", "--issue-url"], description = ["Tracker URL (Jira. github ...)",
         "If a card id is found is will be tail at the end"])
-    private var trackerUrl: String? = null
+    private var issueUrl: String? = null
+
+    @CommandLine.Option(names = ["--issue-id-pattern"], description = ["a regexp to match an issue id",
+        "If a card id is found it will be append at the end of tracker url.",
+        "Regex must contains 2 named capturing groups:",
+        "   First one named: 'R' is the global one used for link substitution ",
+        "   Second one name 'ID' is used to append to issueUrl",
+        " Example:",
+        "    git: \"(?<R>#(?<ID>\\\\d+))\"",
+        "    jira: \"(?<R>JIRA-(?<ID>\\\\d+))\"",
+        "Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html"])
+    private var issueIdRegex: String? = "(?<R>#(?<ID>\\d+))"
 
     @CommandLine.Option(names = ["-F", "--template-file"], description = ["Template file path",
         "Used to override the default changelog template. We use Mustache engine."])
     private var template: Path? = null
 
-    @CommandLine.Option(names = ["-l", "--no-commit-link"], negatable = true, defaultValue = "false",
-                        description = ["Append git commit URL for change log  (github, gitlab ...)",
+    @CommandLine.Option(names = ["--no-commit-link"], negatable = true, defaultValue = "true",
+                        description = ["Append git commit URL for change log",
                             "Default value is '\${DEFAULT-VALUE}'"])
-    private var noCommitLink: Boolean = false
+    private var commitLink: Boolean = true
 
     @CommandLine.Option(names = ["-g", "--git-commit-url"],
                         description = [
@@ -103,10 +120,11 @@ class CoCoChaCmd : Runnable {
                                      releaseCount,
                                      if (commitType.equals("*")) CommitType.values().toList()
                                      else commitType.map { CommitType.of(it) },
-                                     noCommitLink,
+                                     commitLink,
                                      gitCommitUrl,
-                                     trackerUrl,
-                                     null)
+                                     issueLink,
+                                     issueUrl,
+                                     if (issueIdRegex == null) null else Pattern.compile(issueIdRegex!!))
         ChangelogGenerator(params).run()
     }
 }
