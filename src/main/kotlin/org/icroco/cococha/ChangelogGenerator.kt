@@ -33,7 +33,7 @@ data class GeneratorParams(var template: Path?,
     }
 }
 
-class ChangelogGenerator(val params: GeneratorParams) {
+class ChangelogGenerator(private val params: GeneratorParams) {
     private companion object : KLogging()
 
     private val gitService = GitService()

@@ -20,17 +20,17 @@ fun Ref.getSafeObjectId(): ObjectId {
 data class VersionTag(val major: Int,
                       val minor: Int,
                       val build: Int,
-                      val tagName: String? = null) : Comparable<VersionTag> {
+                      val ref: Ref? = null) : Comparable<VersionTag> {
 
-    constructor(tagName: String) : this(-1, -1, -1, tagName) {
+    constructor(ref: Ref) : this(-1, -1, -1, ref) {
     }
 
-    fun isSemantic(): Boolean {
+    private fun isSemantic(): Boolean {
         return major >= 0 && minor >= 0 && minor >= 0
     }
 
     override fun toString(): String {
-        return if (isSemantic()) "v$major.$minor.$build" else tagName!!.removePrefix("refs/tags/")
+        return if (isSemantic()) "v$major.$minor.$build" else ref?.name?.removePrefix("refs/tags/") ?: "NotYetDefined"
     }
 
     override fun compareTo(other: VersionTag): Int {
@@ -49,12 +49,12 @@ data class VersionTag(val major: Int,
                 if (plusMajor) major + 1 else major,
                 if (plusMinor) minor + 1 else minor,
                 if (plusBuild) build + 1 else build,
-                "NotYetDefined")
+                ref)
         else throw IllegalArgumentException("Can not create automatuc version number fron non semantic version")
     }
 }
 
-class GitService(private val baseDir: File? = null) {
+class GitService(baseDir: File? = null) {
     private companion object : KLogging()
 
     private val repository: Repository = RepositoryBuilder()
@@ -73,8 +73,8 @@ class GitService(private val baseDir: File? = null) {
             .map { r: Ref ->
                 val m = tagPattern.matcher(r.name)
                 logger.debug { "Found tag: '$r'" + (if (m.matches()) "" else " Non conventional tag, will be ignored for release auto naming") }
-                if (m.matches()) VersionTag(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), r.name)
-                else VersionTag(r.name)
+                if (m.matches()) VersionTag(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), r)
+                else VersionTag(r)
             }
 //                .filter { (_, m) -> m.matches() }
 //                .map { (r, m) -> VersionTag( m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt()) }
@@ -86,12 +86,11 @@ class GitService(private val baseDir: File? = null) {
                               .call()
                               .asSequence()
                               .filter { t -> t.name == tagName }
-                              .map { t -> t.name }
                               .first())
         // TODO: manage if not found.
     }
 
-    fun getCommitRange(releaseName: String, from: ObjectId, to: ObjectId): Release {
+    private fun getCommitRange(releaseName: String, from: ObjectId, to: ObjectId): Release {
 
 //        val rw = RevWalk(repository)
 //        val ro = rw.parseCommit(from)
@@ -102,7 +101,7 @@ class GitService(private val baseDir: File? = null) {
         val commits = log.addRange(from, to)
             .call()
             .map { rm ->
-                logger.debug { rm.shortMessage }
+                logger.debug { "Found commit log: '${rm.shortMessage}'" }
                 val matcher = typePattern.matcher(rm.shortMessage)
                 if (matcher.matches()) {
                     CommitDesc(CommitType.of(matcher.group("T")),
@@ -141,7 +140,7 @@ class GitService(private val baseDir: File? = null) {
         var name = relName
         val releases = mutableListOf<Release>()
         for (t in tags) {
-            val from = repository.resolve(t.tagName)
+            val from = repository.refDatabase.peel(t.ref).getSafeObjectId()
             releases.add(getCommitRange(name, from, to))
             to = from
             name = t.toString()

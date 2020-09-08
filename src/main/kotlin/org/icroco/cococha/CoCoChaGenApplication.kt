@@ -36,7 +36,7 @@ class PropertiesVersionProvider : CommandLine.IVersionProvider {
                      description = ["@|bold Conventional Commit Changelog|@ @|underline Generator|@", ""],
                      versionProvider = PropertiesVersionProvider::class
 )
-class CoCoChaCmd() : Runnable {
+class CoCoChaCmd : Runnable {
 
     @CommandLine.Option(names = ["-o", "--output"], description = ["output changelog filename",
         "Default value is '\${DEFAULT-VALUE}'"], defaultValue = "CHANGELOG.md")
