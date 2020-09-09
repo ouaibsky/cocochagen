@@ -116,8 +116,6 @@ class GitService(baseDir: File? = null) {
                     // TODO: Manage many issue
                     val pair = getIds(desc, issueIdRegex.matcher(rm.shortMessage), issueIdRegex.matcher(rm.fullMessage))
                     desc = pair.first.trim()
-                    val issueId: String? = pair.second.firstOrNull()
-
                     desc = if (desc.endsWith(".")) desc else "${desc}."
                     CommitDesc(CommitType.of(matcher.group("T")),
                                matcher.group("C")?.replace("_", " "),
@@ -154,7 +152,7 @@ class GitService(baseDir: File? = null) {
         while (matcherFull.find()) {
             ids.add(matcherFull.group("ID"))
         }
-        return Pair(newDesc, ids)
+        return Pair(newDesc, ids.toSortedSet())
     }
 
 //    fun getCommitRange(releaseName: String, from: Ref): Release {
