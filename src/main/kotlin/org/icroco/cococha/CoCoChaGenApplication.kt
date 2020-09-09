@@ -62,7 +62,7 @@ class CoCoChaCmd : Runnable {
 //    private var fromTag: String? = null
 
     @CommandLine.Option(names = ["-n", "--release-name"], description = ["Provide the name of this release",
-        "By default is automatically computed if you follow semantic versioning"])
+        "By default is automatically computed from last tag if you follow semantic versioning"])
     private var releaseName: String? = null
 
     @CommandLine.Option(names = ["--no-issue-link"], negatable = true, defaultValue = "true",
