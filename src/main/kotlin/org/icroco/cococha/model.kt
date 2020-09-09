@@ -15,7 +15,7 @@ enum class CommitType(val displayPriority: Int, val prefix: String, val fullName
     STYLE(10, "style", "Styles"),
     REVERT(3, "revert", "Reverts"),
     REFACTOR(4, "refactor", "Code Refactoring"),
-    UNKNOWN(4, "unknown", "Others");
+    UNKNOWN(1000, "unknown", "Others");
 
     companion object {
         public fun of(value: String, defaultValue: CommitType? = null): CommitType {
@@ -42,7 +42,14 @@ data class CommitDesc(val type: CommitType,
                       val issueIds: Set<String>,
                       val commitId: String);
 
-data class Release(val name: String, val date: LocalDate, val categories: Map<String, List<CommitDesc>>)
+
+data class Category(val name: String, val messages: List<CommitDesc>)
+
+data class Release(val name: String, val date: LocalDate, val messages: Map<String, List<CommitDesc>>) {
+    fun categories(): List<Category> {
+        return messages.entries.map { e -> Category(e.key, e.value) }
+    }
+}
 
 data class Releases(val releases: List<Release>,
                     val gitUrl: String?,

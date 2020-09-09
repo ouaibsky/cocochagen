@@ -77,7 +77,7 @@ class CoCoChaCmd : Runnable {
     private var issueLink: Boolean = true
 
     @CommandLine.Option(names = ["-i", "--issue-url"], description = ["Tracker URL (Jira. github ...)",
-        "If a card id is found is will be tail at the end",
+        "If a card/issue ID is found is will be tail at the end",
         "Option not defined means we'll used github style'", ""])
     private var issueUrl: String? = null
 
@@ -88,14 +88,14 @@ class CoCoChaCmd : Runnable {
         "   Second one name 'ID' is used to append to issueUrl",
         " Example:",
         "    git: \"(?<R>#(?<ID>\\\\d+))\", git conventional commit: (?<R>Closes:[ ]*)#(?<ID>\\d+)",
-        "    jira: \"(?<R>JIRA-(?<ID>\\\\d+))\"",
+        "    jira: \"(?<R>(?<ID>JIRA-\\\\d+))\"",
         "Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html",
         "Default is '\${DEFAULT-VALUE}'", ""])
     private var issueIdRegex: String = defaultIssueRegex.pattern()
 
     @CommandLine.Option(names = ["-F", "--template-file"], description = ["Template file path",
         "Used to override the default changelog template. We use Mustache engine.",
-        "Option not defined means we'll pick up the one embedded ", ""])
+        "Option not defined means we'll pick up the embedded one", ""])
     private var template: Path? = null
 
     @CommandLine.Option(names = ["--no-commit-link"], negatable = true, defaultValue = "true",

@@ -113,7 +113,6 @@ class GitService(baseDir: File? = null) {
                     var desc = matcher.group("D")
                     desc = if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc.trim()
                     val smId = issueIdRegex.matcher(rm.shortMessage)
-                    // TODO: Manage many issue
                     val pair = getIds(desc, issueIdRegex.matcher(rm.shortMessage), issueIdRegex.matcher(rm.fullMessage))
                     desc = pair.first.trim()
                     desc = if (desc.endsWith(".")) desc else "${desc}."
@@ -133,7 +132,7 @@ class GitService(baseDir: File? = null) {
                     .filter { cd -> filterCommitType.contains(cd.type) }
                     .sortedBy { it.component }
             }.filter { e -> e.value.isNotEmpty() }
-        // TODO: remove duplicate Desc / Issue Id
+        // TODO: remove duplicate Desc
         val parseCommit = repository.parseCommit(to)
         val authorDate = parseCommit.authorIdent.getWhen()
         val authorTimeZone = parseCommit.authorIdent.timeZone.toZoneId()
@@ -146,7 +145,7 @@ class GitService(baseDir: File? = null) {
         var newDesc = desc
         val ids = mutableSetOf<String>()
         while (matcherShort.find()) {
-            newDesc = newDesc.replace(matcherShort.group("R"), "")
+            newDesc = newDesc.replace(matcherShort.group(0), "")
             ids.add(matcherShort.group("ID"))
         }
         while (matcherFull.find()) {
@@ -186,10 +185,10 @@ class GitService(baseDir: File? = null) {
             val from = getOldLog()
             name = if (tags.isEmpty()) relName else tags.last().toString()
             releases.add(getCommitRange(name, from, to, filterCommitType, issueIdRegex))
-            // FIXME: first commit of git history is omitted
+            // FIXME: first commit of git log history is omitted
         }
 
-        return releases.filter { r -> r.categories.isNotEmpty() }
+        return releases.filter { r -> r.messages.isNotEmpty() }
     }
 
 }
