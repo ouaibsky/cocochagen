@@ -122,10 +122,10 @@ class GitService(baseDir: File? = null) {
                     CommitDesc(CommitType.of(matcher.group("T")),
                                matcher.group("C")?.replace("_", " "),
                                desc,
-                               issueId,
+                               pair.second,
                                rm.id.abbreviate(8).name())
                 } else {
-                    CommitDesc(CommitType.UNKNOWN, null, rm.shortMessage, null, rm.id.abbreviate(8).name())
+                    CommitDesc(CommitType.UNKNOWN, null, rm.shortMessage, emptySet(), rm.id.abbreviate(8).name())
                 }
             }
             .groupBy { it.type }

@@ -39,7 +39,7 @@ enum class CommitType(val displayPriority: Int, val prefix: String, val fullName
 data class CommitDesc(val type: CommitType,
                       val component: String?,
                       val description: String,
-                      val issueId: String?,
+                      val issueIds: Set<String>,
                       val commitId: String);
 
 data class Release(val name: String, val date: LocalDate, val categories: Map<String, List<CommitDesc>>)
