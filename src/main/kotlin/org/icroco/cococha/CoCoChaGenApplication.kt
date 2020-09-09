@@ -40,8 +40,8 @@ class PropertiesVersionProvider : CommandLine.IVersionProvider {
 class CoCoChaCmd : Runnable {
 
     @CommandLine.Option(names = ["-o", "--output"], description = ["output changelog filename",
-        "Default value is '\${DEFAULT-VALUE}'"], defaultValue = "CHANGELOG.md")
-    private var outputFile = "CHANGELOG.md"
+        "Default value is '\${DEFAULT-VALUE}'"], defaultValue = "CHANGELOG-from-last-tag.md")
+    private var outputFile = "CHANGELOG-from-last-tag.md"
 
     @CommandLine.Option(names = ["-c", "--release-count"],
                         defaultValue = "1",
