@@ -70,7 +70,7 @@ Conventional Commit Changelog Generator
 - [x] Simple Command line interface.
 - [x] Option to generate release note for last N releases.
 - [x] Option to filter convention commit.
-- [x] Option to provide your own custom template.
+- [x] Option to provide your own custom template ([mustache](https://mustache.github.io/) based. More info at [samskivert](https://github.com/samskivert/jmustache) ).
 - [x] Option to add your own Issuer URL (default is url based on git remote).
 - [x] Option to provide your own regex to match Issue ID.
 - [x] Option to add/hide: "commit ID", "issues ID", "Contributor".

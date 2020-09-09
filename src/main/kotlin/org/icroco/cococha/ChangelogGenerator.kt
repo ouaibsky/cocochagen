@@ -85,7 +85,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
                               StandardOpenOption.CREATE,
                               StandardOpenOption.TRUNCATE_EXISTING)
         }
-        logger.info { "Generation finished: ${params.outputFile}" }
+        logger.info { "Generation finished: ${params.outputFile ?: "stdout"}" }
     }
 
     private fun buildReleaseName(relName: String?, tags: List<VersionTag>): String {
