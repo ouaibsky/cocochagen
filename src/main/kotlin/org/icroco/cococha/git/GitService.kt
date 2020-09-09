@@ -7,6 +7,7 @@ import org.icroco.cococha.CommitDesc
 import org.icroco.cococha.CommitType
 import org.icroco.cococha.Release
 import java.io.File
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 
@@ -94,7 +95,7 @@ class GitService(baseDir: File? = null) {
                                from: ObjectId,
                                to: ObjectId,
                                filterCommitType: List<CommitType>,
-                               trackerIdRegex: Pattern): Release {
+                               issueIdRegex: Pattern): Release {
 
 //        val rw = RevWalk(repository)
 //        val ro = rw.parseCommit(from)
@@ -111,16 +112,13 @@ class GitService(baseDir: File? = null) {
                 if (matcher.matches()) {
                     var desc = matcher.group("D")
                     desc = if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc.trim()
-                    desc = if (desc.endsWith(".")) desc else "$desc."
-                    val smId = trackerIdRegex.matcher(rm.shortMessage)
+                    val smId = issueIdRegex.matcher(rm.shortMessage)
                     // TODO: Manage many issue
-                    val issueId: String? = if (smId.matches()) {
-                        desc = desc.replace(smId.group("R"), "")
-                        smId.group("ID")
-                    } else {
-                        val fmId = trackerIdRegex.matcher(rm.fullMessage)
-                        if (fmId.matches()) fmId.group("ID") else null
-                    }
+                    val pair = getIds(desc, issueIdRegex.matcher(rm.shortMessage), issueIdRegex.matcher(rm.fullMessage))
+                    desc = pair.first.trim()
+                    val issueId: String? = pair.second.firstOrNull()
+
+                    desc = if (desc.endsWith(".")) desc else "${desc}."
                     CommitDesc(CommitType.of(matcher.group("T")),
                                matcher.group("C")?.replace("_", " "),
                                desc,
@@ -137,13 +135,26 @@ class GitService(baseDir: File? = null) {
                     .filter { cd -> filterCommitType.contains(cd.type) }
                     .sortedBy { it.component }
             }.filter { e -> e.value.isNotEmpty() }
-        // TODO: remove duplicate Desc / Tracker
+        // TODO: remove duplicate Desc / Issue Id
         val parseCommit = repository.parseCommit(to)
         val authorDate = parseCommit.authorIdent.getWhen()
         val authorTimeZone = parseCommit.authorIdent.timeZone.toZoneId()
         return Release(releaseName,
                        authorDate.toInstant().atZone(authorTimeZone).toLocalDate(),
                        commits.mapKeys { it.key.fullName })
+    }
+
+    fun getIds(desc: String, matcherShort: Matcher, matcherFull: Matcher): Pair<String, Set<String>> {
+        var newDesc = desc
+        val ids = mutableSetOf<String>()
+        while (matcherShort.find()) {
+            newDesc = newDesc.replace(matcherShort.group("R"), "")
+            ids.add(matcherShort.group("ID"))
+        }
+        while (matcherFull.find()) {
+            ids.add(matcherFull.group("ID"))
+        }
+        return Pair(newDesc, ids)
     }
 
 //    fun getCommitRange(releaseName: String, from: Ref): Release {
@@ -163,20 +174,20 @@ class GitService(baseDir: File? = null) {
                     tags: List<VersionTag>,
                     releaseCount: Int,
                     filterCommitType: List<CommitType>,
-                    trackerIdRegex: Pattern): List<Release> {
+                    issueIdRegex: Pattern): List<Release> {
         var to = repository.resolve(Constants.HEAD)
         var name = relName
         val releases = mutableListOf<Release>()
         for (t in tags) {
             val from = repository.refDatabase.peel(t.ref).getSafeObjectId()
-            releases.add(getCommitRange(name, from, to, filterCommitType, trackerIdRegex))
+            releases.add(getCommitRange(name, from, to, filterCommitType, issueIdRegex))
             to = from
             name = t.toString()
         }
         if (tags.isEmpty() || releases.size < releaseCount) {
             val from = getOldLog()
             name = if (tags.isEmpty()) relName else tags.last().toString()
-            releases.add(getCommitRange(name, from, to, filterCommitType, trackerIdRegex))
+            releases.add(getCommitRange(name, from, to, filterCommitType, issueIdRegex))
             // FIXME: first commit of git history is omitted
         }
 

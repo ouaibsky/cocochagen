@@ -75,15 +75,15 @@ class CoCoChaCmd : Runnable {
     private var issueUrl: String? = null
 
     @CommandLine.Option(names = ["--issue-id-pattern"], description = ["a regexp to match an issue id",
-        "If a card id is found it will be append at the end of tracker url.",
+        "If a card ID is found it will be append at the end of tracker url.",
         "Regex must contains 2 named capturing groups:",
         "   First one named: 'R' is the global one used for link substitution ",
         "   Second one name 'ID' is used to append to issueUrl",
         " Example:",
-        "    git: \"(?<R>#(?<ID>\\\\d+))\", git conventional commit: (?<R>(Closes:\\s*)?)#(?<ID>\\d+)",
+        "    git: \"(?<R>#(?<ID>\\\\d+))\", git conventional commit: (?<R>Closes:[ ]*)#(?<ID>\\d+)",
         "    jira: \"(?<R>JIRA-(?<ID>\\\\d+))\"",
         "Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html"])
-    private var issueIdRegex: String = "(?<R>([Cc][Ll][Oo][Ss][Ee][Ss]\\s*:\\s*)?#(?<ID>\\d+))"
+    private var issueIdRegex: String = defaultIssueRegex.pattern()
 
     @CommandLine.Option(names = ["-F", "--template-file"], description = ["Template file path",
         "Used to override the default changelog template. We use Mustache engine."])
@@ -124,7 +124,7 @@ class CoCoChaCmd : Runnable {
                                      gitCommitUrl,
                                      issueLink,
                                      issueUrl,
-                                     Pattern.compile(".*$issueIdRegex.*", Pattern.DOTALL))
+                                     Pattern.compile("$issueIdRegex", Pattern.DOTALL))
         ChangelogGenerator(params).run()
     }
 }

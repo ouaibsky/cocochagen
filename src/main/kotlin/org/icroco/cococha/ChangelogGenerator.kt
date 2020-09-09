@@ -13,6 +13,8 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.regex.Pattern
 
+val defaultIssueRegex = Pattern.compile("(?<R>([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))", Pattern.DOTALL)
+
 data class GeneratorParams(var template: Path?,
                            var releaseName: String?,
                            val outputFile: String?,
@@ -23,8 +25,8 @@ data class GeneratorParams(var template: Path?,
                            val addCommitLink: Boolean = true,
                            val gitCommitUrl: String? = null,
                            val addIssueLink: Boolean = true,
-                           val trackerUrl: String? = null,
-                           val trackerIdRegex: Pattern) {
+                           val issueUrl: String? = null,
+                           val IssueIdRegex: Pattern = defaultIssueRegex) {
     fun getTemplateReader(): Reader {
         val t = template?.let {
             if (!Files.exists(it)) {
@@ -57,21 +59,21 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         params.releaseName = buildReleaseName(params.releaseName, tags)
         val gitUrl = if (params.addCommitLink) params.gitCommitUrl
                 ?: gitService.getGitRemoteUrl() + "/commit/" else null
-        val trackerUrl = if (params.addIssueLink) params.trackerUrl
+        val issueUrl = if (params.addIssueLink) params.issueUrl
                 ?: gitService.getGitRemoteUrl() + "/issues/" else null
 
         logger.info { "Release name is: '${params.releaseName}'" }
         logger.info { "Filter commit log with: '${params.filterCommitType.joinToString(",") { it.prefix }}'" }
         logger.info { "Git commit URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
-        logger.info { "Issue tracker URL: '${if (params.addIssueLink) (trackerUrl ?: "None") else "Disabled"}'" }
-        logger.info { "Issue ID Regex: '${params.trackerIdRegex?.pattern() ?: "None"}'" }
+        logger.info { "Issue URL: '${if (params.addIssueLink) (issueUrl ?: "None") else "Disabled"}'" }
+        logger.info { "Issue ID Regex: '${params.IssueIdRegex?.pattern() ?: "None"}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
         val releases = gitService.parseCommit(params.releaseName!!,
                                               tags,
                                               params.releaseCount,
                                               params.filterCommitType,
-                                              params.trackerIdRegex)
-        val md = template.execute(Releases(releases, gitUrl, trackerUrl))
+                                              params.IssueIdRegex)
+        val md = template.execute(Releases(releases, gitUrl, issueUrl))
 
         if (params.outputFile == null) {
             println("--------------- CHANGELOG BEGIN ------------------")
