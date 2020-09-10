@@ -32,14 +32,25 @@ class PropertiesVersionProvider : CommandLine.IVersionProvider {
     }
 }
 
+
 @CommandLine.Command(name = "cocochagen",
                      mixinStandardHelpOptions = true,
                      description = ["@|bold Conventional Commit Changelog|@ @|underline Generator|@", ""],
                      versionProvider = PropertiesVersionProvider::class,
                      usageHelpWidth = 140,
-                     showDefaultValues = false
-)
+                     showDefaultValues = false)
 class CoCoChaCmd : Runnable {
+
+
+    internal class OutputExclusive {
+        @CommandLine.Option(names = ["--output-override"], defaultValue = "false",
+                            description = ["Override if output already exists", "Default is: '\${DEFAULT-VALUE}'", ""])
+        var overrideExisting: Boolean = false
+
+        @CommandLine.Option(names = ["--output-append-start"], defaultValue = "false",
+                            description = ["Append the output on top of an existing file", "Default is: '\${DEFAULT-VALUE}'", ""])
+        var appendToStart: Boolean = false
+    }
 
     @CommandLine.Option(
             names = ["-o", "--output"],
@@ -48,9 +59,8 @@ class CoCoChaCmd : Runnable {
     )
     private var outputFile: String? = null
 
-    @CommandLine.Option(names = ["--output-override"], defaultValue = "false",
-                        description = ["Override if output already exists", "Default is: '\${DEFAULT-VALUE}'", ""])
-    private var overrideExisting: Boolean = false
+    @CommandLine.ArgGroup(exclusive = true, multiplicity = "1")
+    private var exclusive = OutputExclusive()
 
     @CommandLine.Option(names = ["-c", "--release-count"],
                         defaultValue = "1",
@@ -126,7 +136,8 @@ class CoCoChaCmd : Runnable {
         }
 
         val params = GeneratorParams(template,
-                                     overrideExisting,
+                                     exclusive.overrideExisting,
+                                     exclusive.appendToStart,
                                      releaseName,
                                      outputFile,
                                      releaseCount,
@@ -136,7 +147,7 @@ class CoCoChaCmd : Runnable {
                                      gitCommitUrl,
                                      issueLink,
                                      issueUrl,
-                                     Pattern.compile("$issueIdRegex", Pattern.DOTALL))
+                                     Pattern.compile(issueIdRegex, Pattern.DOTALL))
         ChangelogGenerator(params).run()
     }
 }

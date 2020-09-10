@@ -76,9 +76,10 @@ Conventional Commit Changelog Generator
 - [x] Option to add your own Issuer URL (default is url based on git remote).
 - [x] Option to provide your own regex to match Issue ID.
 - [x] Option to add/hide: "commit ID", "issues ID", "Contributor".
+- [ ] Option to add/hide: "Contributor".
 - [ ] Option to customize Commit Type label (Features, ...)
-- [ ] Do not override existing changelog. add option to force overriding.
-- [ ] Generate changelog at beginning of an existing one.
+- [x] Do not override existing changelog. add option to force overriding.
+- [x] Generate changelog at beginning of an existing one.
 - [ ] Maven Plugin
 - [ ] Gradle Plugin
 - [ ] Native CLI with GraalVM

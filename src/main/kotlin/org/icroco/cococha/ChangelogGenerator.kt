@@ -18,6 +18,7 @@ val defaultIssueRegex = Pattern.compile("(?<R>([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ 
 
 data class GeneratorParams(var template: Path?,
                            var overrideExisting: Boolean = false,
+                           var appendToStart: Boolean = false,
                            var releaseName: String?,
                            val outputFile: String?,
                            val releaseCount: Int = 1,
@@ -67,6 +68,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         val path: Path? = if (params.outputFile != null) Paths.get(params.outputFile).toAbsolutePath() else null
         logger.info { "Output file is: '${path?.toAbsolutePath() ?: "stdout"}'" }
         logger.info { "Output override existing is: '${params.overrideExisting}'" }
+        logger.info { "Output append at start: '${params.appendToStart}'" }
         logger.info { "Release name is: '${params.releaseName}'" }
         logger.info { "Release Count is: '${params.releaseCount}'" }
         logger.info { "Filter commit log with: '${params.filterCommitType.joinToString(",") { it.prefix }}'" }
@@ -86,6 +88,10 @@ class ChangelogGenerator(private val params: GeneratorParams) {
             println(md)
             println("----------------CHANGELOG END -----------------")
         } else {
+            if (params.appendToStart && params.overrideExisting) {
+                logger.error { "Option to override and append are exclusive, both cannot be true" }
+                exitProcess(1)
+            }
             if (path.toFile().isDirectory) {
                 logger.error { "Output cannot be a directory: '$path'" }
                 exitProcess(1)
@@ -98,10 +104,19 @@ class ChangelogGenerator(private val params: GeneratorParams) {
                 logger.error { "File: '${path.toAbsolutePath()}' already exists. Set the right option to force overriding or change filename" }
                 exitProcess(1)
             }
-            Files.writeString(path,
-                              md,
-                              StandardOpenOption.CREATE,
-                              StandardOpenOption.TRUNCATE_EXISTING)
+            if (Files.exists(path) && params.appendToStart) {
+                val previousFile = Files.readString(path)
+                Files.writeString(path, md + """
+                    -----
+                    
+                """.trimIndent(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+                Files.writeString(path, previousFile, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            } else {
+                Files.writeString(path,
+                                  md,
+                                  StandardOpenOption.CREATE,
+                                  StandardOpenOption.TRUNCATE_EXISTING)
+            }
             logger.info { "Generation finished: ${path?.toAbsolutePath() ?: "stdout"}" }
         }
     }
