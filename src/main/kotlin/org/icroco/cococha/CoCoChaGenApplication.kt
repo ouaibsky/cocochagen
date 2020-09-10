@@ -48,6 +48,10 @@ class CoCoChaCmd : Runnable {
     )
     private var outputFile: String? = null
 
+    @CommandLine.Option(names = ["--output-override"], defaultValue = "false",
+                        description = ["Override if output already exists", "Default is: '\${DEFAULT-VALUE}'", ""])
+    private var overrideExisting: Boolean = false
+
     @CommandLine.Option(names = ["-c", "--release-count"],
                         defaultValue = "1",
                         description = ["Last N releases to include into this changelog.",
@@ -122,6 +126,7 @@ class CoCoChaCmd : Runnable {
         }
 
         val params = GeneratorParams(template,
+                                     overrideExisting,
                                      releaseName,
                                      outputFile,
                                      releaseCount,

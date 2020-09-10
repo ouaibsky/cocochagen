@@ -12,10 +12,12 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.regex.Pattern
+import kotlin.system.exitProcess
 
 val defaultIssueRegex = Pattern.compile("(?<R>([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))", Pattern.DOTALL)
 
 data class GeneratorParams(var template: Path?,
+                           var overrideExisting: Boolean = false,
                            var releaseName: String?,
                            val outputFile: String?,
                            val releaseCount: Int = 1,
@@ -62,7 +64,11 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         val issueUrl = if (params.addIssueLink) params.issueUrl
                 ?: gitService.getGitRemoteUrl() + "/issues/" else null
 
+        val path: Path? = if (params.outputFile != null) Paths.get(params.outputFile).toAbsolutePath() else null
+        logger.info { "Output file is: '${path?.toAbsolutePath() ?: "stdout"}'" }
+        logger.info { "Output override existing is: '${params.overrideExisting}'" }
         logger.info { "Release name is: '${params.releaseName}'" }
+        logger.info { "Release Count is: '${params.releaseCount}'" }
         logger.info { "Filter commit log with: '${params.filterCommitType.joinToString(",") { it.prefix }}'" }
         logger.info { "Git commit URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
         logger.info { "Issue URL: '${if (params.addIssueLink) (issueUrl ?: "None") else "Disabled"}'" }
@@ -75,17 +81,29 @@ class ChangelogGenerator(private val params: GeneratorParams) {
                                               params.IssueIdRegex)
         val md = template.execute(Releases(releases, gitUrl, issueUrl))
 
-        if (params.outputFile == null) {
+        if (path == null) {
             println("--------------- CHANGELOG BEGIN ------------------")
             println(md)
             println("----------------CHANGELOG END -----------------")
         } else {
-            Files.writeString(Paths.get(params.outputFile),
+            if (path.toFile().isDirectory) {
+                logger.error { "Output cannot be a directory: '$path'" }
+                exitProcess(1)
+            }
+            if (Files.notExists(path.parent)) {
+                logger.error { "Parent directory doesn't exist: '${path.parent.toAbsolutePath()}'" }
+                exitProcess(1)
+            }
+            if (Files.exists(path) && !params.overrideExisting) {
+                logger.error { "File: '${path.toAbsolutePath()}' already exists. Set the right option to force overriding or change filename" }
+                exitProcess(1)
+            }
+            Files.writeString(path,
                               md,
                               StandardOpenOption.CREATE,
                               StandardOpenOption.TRUNCATE_EXISTING)
+            logger.info { "Generation finished: ${path?.toAbsolutePath() ?: "stdout"}" }
         }
-        logger.info { "Generation finished: ${params.outputFile ?: "stdout"}" }
     }
 
     private fun buildReleaseName(relName: String?, tags: List<VersionTag>): String {

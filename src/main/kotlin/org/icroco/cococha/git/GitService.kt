@@ -77,8 +77,6 @@ class GitService(baseDir: File? = null) {
                 if (m.matches()) VersionTag(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), r)
                 else VersionTag(r)
             }
-//                .filter { (_, m) -> m.matches() }
-//                .map { (r, m) -> VersionTag( m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt()) }
             .toList()
     }
 
@@ -112,7 +110,6 @@ class GitService(baseDir: File? = null) {
                 if (matcher.matches()) {
                     var desc = matcher.group("D")
                     desc = if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc.trim()
-                    val smId = issueIdRegex.matcher(rm.shortMessage)
                     val pair = getIds(desc, issueIdRegex.matcher(rm.shortMessage), issueIdRegex.matcher(rm.fullMessage))
                     desc = pair.first.trim()
                     desc = if (desc.endsWith(".")) desc else "${desc}."
@@ -153,10 +150,6 @@ class GitService(baseDir: File? = null) {
         }
         return Pair(newDesc, ids.toSortedSet())
     }
-
-//    fun getCommitRange(releaseName: String, from: Ref): Release {
-//        return getCommitRange(releaseName, from.getSafeObjectId(), repository.resolve(Constants.HEAD))
-//    }
 
     private fun getOldLog(): ObjectId {
         val call = git.log().setMaxCount(1000).call()

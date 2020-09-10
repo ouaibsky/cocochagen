@@ -76,7 +76,7 @@ Conventional Commit Changelog Generator
 - [x] Option to add your own Issuer URL (default is url based on git remote).
 - [x] Option to provide your own regex to match Issue ID.
 - [x] Option to add/hide: "commit ID", "issues ID", "Contributor".
-- [ ] Option to customize Commit Type (Features, ...)
+- [ ] Option to customize Commit Type label (Features, ...)
 - [ ] Do not override existing changelog. add option to force overriding.
 - [ ] Generate changelog at beginning of an existing one.
 - [ ] Maven Plugin
@@ -84,7 +84,11 @@ Conventional Commit Changelog Generator
 - [ ] Native CLI with GraalVM
 
 # Trouble Shooting
+* Runtime working dir: be careful, right now you won't have same result if your run with **java -jar ...** ot **./cocochgen.jar**
+    * with java -jar working dir is the current dir where you launch the command
+    * running like an executable **./cocochagen.jar**, the working dir will be where jar is located
+    > example: './foo/bar/cocochagen.jar' is executing into directory './foo/bar'
 * If your changelog looks not as expected (missing items,  ...), try to run with theses options:
     > ./cocochagen -t '*' -c 10
                                                                                                    >
-* Finally use **-v** to get more details on stdout. 
+* Finally, use **-v** to get more details on stdout. 
