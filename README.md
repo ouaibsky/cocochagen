@@ -1,15 +1,25 @@
 # Read Me First
-[Convention Commit](https://www.conventionalcommits.org/) Changelog Generator
+[Convention Commit](https://www.conventionalcommits.org/) Changelog Generator (obviously for Git)
 
 # Getting Started
 
 [look at output example](examples/CHANGELOG-from-last-tag.md)
+
+Download the executable jar from maven central:
+```
+<dependency>
+  <groupId>org.icroco</groupId>
+  <artifactId>cocochagen</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
 
 > run cli: ./cocochagen -h
 
 ```bash
 Usage: cocochagen [-hvV] [--[no-]commit-link] [--[no-]issue-link] [-c=<releaseCount>] [-F=<template>] [-g=<gitCommitUrl>] [-i=<issueUrl>]
                   [--issue-id-pattern=<issueIdRegex>] [-n=<releaseName>] [-o=<outputFile>] [-t=<commitType>[,<commitType>...]]...
+                  ([--output-override] | [--output-append-start])
 Conventional Commit Changelog Generator
 
   -c, --release-count=<releaseCount>
@@ -19,34 +29,37 @@ Conventional Commit Changelog Generator
   -F, --template-file=<template>
                            Template file path
                            Used to override the default changelog template. We use Mustache engine.
-                           Option not defined means we'll pick up the one embedded
+                           Option undefined means we'll pick up the embedded one
 
   -g, --git-commit-url=<gitCommitUrl>
                            Remote url prefix to build commit link (github, gitlab ...)
-                           Option not defined means we'll try to read from git remote (origin/master).
+                           Option undefined means we'll try to read from git remote (origin/master).
 
   -h, --help               Show this help message and exit.
   -i, --issue-url=<issueUrl>
                            Tracker URL (Jira. github ...)
-                           If a card id is found is will be tail at the end
-                           Option not defined means we'll used github style'
+                           If a card/issue ID is found is will be tail at the end
+                           Option undefined means we'll used github
 
       --issue-id-pattern=<issueIdRegex>
                            a regexp to match an issue id
                            If a card ID is found it will be append at the end of tracker url.
-                           Regex must contains 2 named capturing groups:
-                              First one named: 'R' is the global one used for link substitution
-                              Second one name 'ID' is used to append to issueUrl
-                            Example:
-                               git: "(?<R>#(?<ID>\\d+))", git conventional commit: (?<R>Closes:[ ]*)#(?<ID>\d+)
-                               jira: "(?<R>JIRA-(?<ID>\\d+))"
+                           Regex must contains 1 global group and 1 named capturing groups:
+                              A global one used to identify an entirely issue id (ex: Closes: #1234)
+                              Second one is named 'ID', used to extract the id that will be appended after issueUrl (ex: 1234)
+                            Examples:
+                               git: "(#(?<ID>\\d+))",
+                               jira: "(?<ID>JIRA-\\d+)"
+                               Strict conventional commit: "(Closes: )#(?<ID>\\d+)"
+                               Advanced conventional commit: "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))"
+                               Mix git and coco style: "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#?(?<ID>\\d+))"
                            Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
-                           Default is '(?<R>([Cc][Ll][Oo][Ss][Ee][Ss][ 	]*:[ 	]*)?#(?<ID>\d+))'
+                           Default is git style optionally with prefix 'Closes: ' '(([Cc][Ll][Oo][Ss][Ee][Ss][ 	]*:[ 	]*)?#(?<ID>\d+))'
 
   -n, --release-name=<releaseName>
                            Provide the name of this release
                            By default is automatically computed from last tag if you follow semantic versioning
-                           Option not defined means automatic release name'
+                           Option undefined means automatic release name'
 
       --[no-]commit-link   Add git commit URL for change log
                            Default is: 'true'
@@ -57,6 +70,13 @@ Conventional Commit Changelog Generator
   -o, --output=<outputFile>
                            output changelog filename
 
+      --output-append-start
+                           Append the output on top of an existing file
+                           Default is: 'false'
+
+      --output-override    Override if output already exists
+                           Default is: 'false'
+
   -t, --commit-type=<commitType>[,<commitType>...]
                            Filter only those commits type
                            Default is: 'fix,feat,perf'
@@ -65,7 +85,7 @@ Conventional Commit Changelog Generator
                            Default is: 'false'
 
   -V, --version            Print version information and exit.
-````
+```
 
 # Features
 
