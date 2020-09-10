@@ -125,7 +125,7 @@ class CoCoChaCmd : Runnable {
                                      releaseName,
                                      outputFile,
                                      releaseCount,
-                                     if (commitType.equals("*")) CommitType.values().toList()
+                                     if (commitType.contains("*")) CommitType.values().toList()
                                      else commitType.map { CommitType.of(it) },
                                      commitLink,
                                      gitCommitUrl,

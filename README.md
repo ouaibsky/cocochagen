@@ -83,5 +83,8 @@ Conventional Commit Changelog Generator
 - [ ] Gradle Plugin
 - [ ] Native CLI with GraalVM
 
-# Reference Documentation
-
+# Trouble Shooting
+* If your changelog looks not as expected (missing items,  ...), try to run with theses options:
+    > ./cocochagen -t '*' -c 10
+                                                                                                   >
+* Finally use **-v** to get more details on stdout. 
