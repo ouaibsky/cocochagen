@@ -82,7 +82,7 @@ Conventional Commit Changelog Generator
 - [x] Do not override existing changelog. add option to force overriding.
 - [x] Generate changelog at beginning of an existing one.
 - [ ] Export report into json format
-- [ ] Publish to maven central
+- [x] Publish to maven central
 - [ ] Add Travis
 - [ ] Maven Plugin
 - [ ] Gradle Plugin

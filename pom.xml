@@ -4,9 +4,54 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.icroco</groupId>
     <artifactId>cocochagen</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>cocochagen</name>
     <description>Conventional Commit Changelog Generator</description>
+
+    <url>https://github.com/ouaibsky/cocochagen</url>
+    <inceptionYear>2020</inceptionYear>
+
+    <developers>
+        <developer>
+            <id>ouaibsky</id>
+            <name>Christophe Lallement</name>
+            <roles>
+                <role>Senior Architect</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/ouaibsky/cocochagen.git</connection>
+        <developerConnection>scm:git:https://github.com/ouaibsky/cocochagen.git</developerConnection>
+        <url>https://github.com/ouaibsky/cocochagen</url>
+    </scm>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/ouaibsky/cocochagen/issues</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License version 3.0 (GPLv3)</name>
+            <url>http://www.opensource.org/licenses/gpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>ICROCO Release Repository</name>
+            <url>http://oss.sonatype.org/content/repositories/icroco-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>ICROCO Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <properties>
         <java.version>14</java.version>
@@ -218,6 +263,45 @@
                         <argument>org.icroco.cococha.CoCoChaCmd</argument><!-- replace with your class -->
                     </arguments>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <!--Think to define var: export GPG_TTY=$(tty)-->
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

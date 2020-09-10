@@ -59,7 +59,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
             tags = tags.take(params.releaseCount)
         }
 
-        params.releaseName = buildReleaseName(params.releaseName, tags)
+        params.releaseName = buildReleaseName(tags)
         val gitUrl = if (params.addCommitLink) params.gitCommitUrl
                 ?: gitService.getGitRemoteUrl() + "/commit/" else null
         val issueUrl = if (params.addIssueLink) params.issueUrl
@@ -74,7 +74,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         logger.info { "Filter commit log with: '${params.filterCommitType.joinToString(",") { it.prefix }}'" }
         logger.info { "Git commit URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
         logger.info { "Issue URL: '${if (params.addIssueLink) (issueUrl ?: "None") else "Disabled"}'" }
-        logger.info { "Issue ID Regex: '${params.IssueIdRegex?.pattern() ?: "None"}'" }
+        logger.info { "Issue ID Regex: '${params.IssueIdRegex.pattern() ?: "None"}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
         val releases = gitService.parseCommit(params.releaseName!!,
                                               tags,
@@ -117,11 +117,11 @@ class ChangelogGenerator(private val params: GeneratorParams) {
                                   StandardOpenOption.CREATE,
                                   StandardOpenOption.TRUNCATE_EXISTING)
             }
-            logger.info { "Generation finished: ${path?.toAbsolutePath() ?: "stdout"}" }
+            logger.info { "Generation finished: ${path.toAbsolutePath() ?: "stdout"}" }
         }
     }
 
-    private fun buildReleaseName(relName: String?, tags: List<VersionTag>): String {
+    private fun buildReleaseName(tags: List<VersionTag>): String {
         return params.releaseName
                 ?: if (tags.isEmpty()) VersionTag(0, 0, 1).toString()
                 else tags.first().nextVersion().toString()
