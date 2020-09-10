@@ -78,8 +78,12 @@ Conventional Commit Changelog Generator
 - [x] Option to add/hide: "commit ID", "issues ID", "Contributor".
 - [ ] Option to add/hide: "Contributor".
 - [ ] Option to customize Commit Type label (Features, ...)
+- [ ] Merge same commit msg and support many CommitID links
 - [x] Do not override existing changelog. add option to force overriding.
 - [x] Generate changelog at beginning of an existing one.
+- [ ] Export report into json format
+- [ ] Publish to maven central
+- [ ] Add Travis
 - [ ] Maven Plugin
 - [ ] Gradle Plugin
 - [ ] Native CLI with GraalVM

@@ -109,7 +109,7 @@ class GitService(baseDir: File? = null) {
 
                 if (matcher.matches()) {
                     var desc = matcher.group("D")
-                    desc = if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc.trim()
+                    desc = (if (desc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else desc).trim()
                     val pair = getIds(desc, issueIdRegex.matcher(rm.shortMessage), issueIdRegex.matcher(rm.fullMessage))
                     desc = pair.first.trim()
                     desc = if (desc.endsWith(".")) desc else "${desc}."

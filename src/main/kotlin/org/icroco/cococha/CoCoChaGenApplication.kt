@@ -81,7 +81,7 @@ class CoCoChaCmd : Runnable {
 
     @CommandLine.Option(names = ["-n", "--release-name"], description = ["Provide the name of this release",
         "By default is automatically computed from last tag if you follow semantic versioning",
-        "Option not defined means automatic release name'", ""])
+        "Option undefined means automatic release name'", ""])
     private var releaseName: String? = null
 
     @CommandLine.Option(names = ["--no-issue-link"], negatable = true, defaultValue = "true",
@@ -92,24 +92,27 @@ class CoCoChaCmd : Runnable {
 
     @CommandLine.Option(names = ["-i", "--issue-url"], description = ["Tracker URL (Jira. github ...)",
         "If a card/issue ID is found is will be tail at the end",
-        "Option not defined means we'll used github style'", ""])
+        "Option undefined means we'll used github", ""])
     private var issueUrl: String? = null
 
     @CommandLine.Option(names = ["--issue-id-pattern"], description = ["a regexp to match an issue id",
         "If a card ID is found it will be append at the end of tracker url.",
-        "Regex must contains 2 named capturing groups:",
-        "   First one named: 'R' is the global one used for link substitution ",
-        "   Second one name 'ID' is used to append to issueUrl",
-        " Example:",
-        "    git: \"(?<R>#(?<ID>\\\\d+))\", git conventional commit: (?<R>Closes:[ ]*)#(?<ID>\\d+)",
-        "    jira: \"(?<R>(?<ID>JIRA-\\\\d+))\"",
+        "Regex must contains 1 global group and 1 named capturing groups:",
+        "   Global one is used to identify an issue ID: ",
+        "   Second one name 'ID' is used to identify the ID to ba appended to issueUrl",
+        " Examples:",
+        "    git: \"(#(?<ID>\\\\d+))\",",
+        "    jira: \"(?<ID>JIRA-\\\\d+)\"",
+        "    Strict conventional commit: \"(Closes: )#(?<ID>\\\\d+)\"",
+        "    Advanced conventional commit: \"(([Cc][Ll][Oo][Ss][Ee][Ss][ \\t]*:[ \\t]*)?#(?<ID>\\\\d+))\"",
+        "    Mix git and coco style: \"(([Cc][Ll][Oo][Ss][Ee][Ss][ \\t]*:[ \\t]*)?#?(?<ID>\\\\d+))\"",
         "Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html",
-        "Default is '\${DEFAULT-VALUE}'", ""])
+        "Default is git style optionally with prefix 'Closes: ' '\${DEFAULT-VALUE}'", ""])
     private var issueIdRegex: String = defaultIssueRegex.pattern()
 
     @CommandLine.Option(names = ["-F", "--template-file"], description = ["Template file path",
         "Used to override the default changelog template. We use Mustache engine.",
-        "Option not defined means we'll pick up the embedded one", ""])
+        "Option undefined means we'll pick up the embedded one", ""])
     private var template: Path? = null
 
     @CommandLine.Option(names = ["--no-commit-link"], negatable = true, defaultValue = "true",
@@ -119,7 +122,7 @@ class CoCoChaCmd : Runnable {
     @CommandLine.Option(names = ["-g", "--git-commit-url"],
                         description = [
                             "Remote url prefix to build commit link (github, gitlab ...)",
-                            "Option not defined means we'll try to read from git remote (origin/master).", ""
+                            "Option undefined means we'll try to read from git remote (origin/master).", ""
                         ])
     private var gitCommitUrl: String? = null
 

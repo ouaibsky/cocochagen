@@ -14,7 +14,7 @@ import java.nio.file.StandardOpenOption
 import java.util.regex.Pattern
 import kotlin.system.exitProcess
 
-val defaultIssueRegex = Pattern.compile("(?<R>([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))", Pattern.DOTALL)
+val defaultIssueRegex = Pattern.compile("(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))", Pattern.DOTALL)
 
 data class GeneratorParams(var template: Path?,
                            var overrideExisting: Boolean = false,
