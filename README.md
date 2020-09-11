@@ -4,6 +4,7 @@
 - [Trouble Shooting](#trouble-shooting)
 
 # Read Me First
+
 * [Convention Commit](https://www.conventionalcommits.org/) Changelog Generator (obviously for Git)
 
 # Getting Started
@@ -26,8 +27,18 @@ Can be renamed whatever
   <version>1.0.1</version>
 </dependency>
 ```
+### Linux /Mac
+> ./cococha -h
 
-> run cli: ./cocochagen -h
+or
+
+>java -jar cococha.jar -h
+
+### Window
+
+>java -jar cococha.jar -h
+
+### Usage
 
 ```bash
 Usage: cocochagen [-hvV] [--[no-]commit-link] [--[no-]issue-link] [-c=<releaseCount>] [-F=<template>] [-g=<gitCommitUrl>] [-i=<issueUrl>]
@@ -124,10 +135,10 @@ Conventional Commit Changelog Generator
 # Trouble Shooting
 * Runtime working dir: be careful, right now you won't have same result if your run with **java -jar ...** ot **./cocochgen.jar**
     * with java -jar working dir is the current dir where you launch the command
-    * running like an executable **./cocochagen.jar**, the working dir will be where jar is located
-    > example: './foo/bar/cocochagen.jar' is executing into directory './foo/bar'
-* If your changelog looks not as expected (missing items,  ...), try to run with theses options:
-    > ./cocochagen -t '*' -c 10
+    * running like an executable **./cococha.jar**, the working dir will be where jar is located
+    > example: './foo/bar/cocochagen.jar' is executing into the directory './foo/bar'
+* If your changelog looks not as expected (missing items,  ...), try to run with these options:
+    > ./cococha.jar -t '*' -c 10
                                                                                                    >
 * Finally, use **-v** to get more details on stdout. 
 
