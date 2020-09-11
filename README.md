@@ -1,16 +1,29 @@
+- [Read Me First](#read-me-first)
+- [Getting Started](#getting-started)
+- [Features](#features)
+- [Trouble Shooting](#trouble-shooting)
+
 # Read Me First
-[Convention Commit](https://www.conventionalcommits.org/) Changelog Generator (obviously for Git)
+* [Convention Commit](https://www.conventionalcommits.org/) Changelog Generator (obviously for Git)
 
 # Getting Started
 
-[look at output example](examples/CHANGELOG-from-last-tag.md)
+* [look at output example](examples/CHANGELOG-from-last-tag.md)
 
-Download the executable jar from maven central:
+### Manual Download (Always las version)
+
+* [cococha](./cococha.jar)
+
+### Maven (all versions) 
+
+Download the executable jar from maven central (cocochagen-cli-x.y.z.jar)
+Can be renamed whatever
+
 ```
 <dependency>
-  <groupId>org.icroco</groupId>
-  <artifactId>cocochagen</artifactId>
-  <version>1.0.0</version>
+  <groupId>org.icroco.cocochagen</groupId>
+  <artifactId>cocochagen-cli</artifactId>
+  <version>1.0.1</version>
 </dependency>
 ```
 
@@ -117,3 +130,7 @@ Conventional Commit Changelog Generator
     > ./cocochagen -t '*' -c 10
                                                                                                    >
 * Finally, use **-v** to get more details on stdout. 
+
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
