@@ -94,6 +94,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
             if (path.toFile().isDirectory) {
                 throw IllegalArgumentException("Output cannot be a directory: '$path'")
             }
+            path.parent.toFile().mkdirs()
             if (Files.notExists(path.parent)) {
                 throw IllegalArgumentException("Parent directory doesn't exist: '${path.parent.toAbsolutePath()}'")
             }
@@ -118,9 +119,22 @@ class ChangelogGenerator(private val params: GeneratorParams) {
     }
 
     private fun buildReleaseName(tags: List<VersionTag>): String {
-        return params.releaseName
-                ?: if (tags.isEmpty()) VersionTag(0, 0, 1).toString()
-                else tags.first().nextVersion().toString()
+        logger.debug {
+            "create release name, manual name: '${params.releaseName}', tags: '${
+                tags.take(10).joinToString(",") { it.toString() }
+            }'"
+        }
+        val name = if (params.releaseName == null) {
+            if (tags.isEmpty())
+                VersionTag(0, 0, 1).toString()
+            else
+                tags.first().nextVersion().toString()
+        } else {
+            null
+        }
+        logger.debug { "Final Release Name: '${name}'" }
+        return name
+                ?: throw IllegalArgumentException("Release name can not be null and cannot be computed from semantic version found in last tag")
     }
 }
 

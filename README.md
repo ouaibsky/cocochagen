@@ -1,42 +1,71 @@
-- [Read Me First](#read-me-first)
-- [Getting Started](#getting-started)
+- [Read Me First.](#read-me-first)
+- [Getting Started.](#getting-started)
+    + [Download an executable jar.](#download-an-executable-jar)
+    + [Maven: add to your build.](#maven--add-to-your-build)
+    + [Gradle: add to your build.](#gradle--add-to-your-build)
+    + [CLI](#cli)
+      - [Linux /Mac](#linux--mac)
+      - [Window](#window)
+    + [Usage](#usage)
 - [Features](#features)
 - [Trouble Shooting](#trouble-shooting)
 
-# Read Me First
+# Read Me First.
 
 * [Convention Commit](https://www.conventionalcommits.org/) Changelog Generator (obviously for Git)
 
-# Getting Started
+# Getting Started.
 
 * [look at output example](examples/CHANGELOG-from-last-tag.md)
 
-### Manual Download (Always las version)
+### Download an executable jar.
 
-* [cococha](./cococha.jar)
+* last version
 
-### Maven (all versions) 
+    * [cococha](./cococha.jar)
 
-Download the executable jar from maven central (cocochagen-cli-x.y.z.jar)
-Can be renamed whatever
+* Maven (all versions) 
 
+    * Download the executable jar from maven central (cocochagen-cli-x.y.z.jar).
+Can be renamed whatever.
+
+        ```xml
+        <dependency>
+          <groupId>org.icroco.cocochagen</groupId>
+          <artifactId>cocochagen-cli</artifactId>
+          <version>1.0.1</version>
+        </dependency>
+        ```
+
+### Maven: add to your build.
+
+```xml
+      <plugin>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>cocochagen-maven-plugin</artifactId>
+          <version>X.Y.Z</version>
+          <configuration>
+              <overrideExisting>true</overrideExisting>
+              <releaseCount>5</releaseCount>
+          </configuration>
+      </plugin>
 ```
-<dependency>
-  <groupId>org.icroco.cocochagen</groupId>
-  <artifactId>cocochagen-cli</artifactId>
-  <version>1.0.1</version>
-</dependency>
-```
-### Linux /Mac
+
+### Gradle: add to your build.
+
+TODO
+    
+### CLI
+#### Linux /Mac
 > ./cococha -h
 
 or
 
->java -jar cococha.jar -h
+> java -jar cococha.jar -h
 
-### Window
+#### Window
 
->java -jar cococha.jar -h
+> java -jar cococha.jar -h
 
 ### Usage
 

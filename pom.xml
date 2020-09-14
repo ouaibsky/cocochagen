@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.icroco.cocochagen</groupId>
     <artifactId>cocochagen-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>cocochagen-parent</name>
     <description>Conventional Commit Changelog Generator</description>
     <packaging>pom</packaging>
@@ -99,6 +99,7 @@
     <modules>
         <module>common</module>
         <module>cli</module>
+        <module>maven-plugin</module>
     </modules>
 
     <build>
