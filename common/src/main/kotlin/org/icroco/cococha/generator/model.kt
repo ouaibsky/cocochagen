@@ -40,7 +40,12 @@ data class CommitDesc(val type: CommitType,
                       val component: String?,
                       val description: String,
                       val issueIds: Set<String>,
-                      val commitId: String);
+                      val commitIds: MutableSet<String>) {
+    fun addCommitIds(cId: Collection<String>): CommitDesc {
+        commitIds.addAll(cId)
+        return this
+    }
+}
 
 
 data class Category(val name: String, val messages: List<CommitDesc>)

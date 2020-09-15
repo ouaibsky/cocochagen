@@ -131,6 +131,15 @@ class CoCoChaCmd : Runnable {
                         ])
     private var gitCommitUrl: String? = null
 
+    @CommandLine.Option(names = ["-r", "--remove-duplicate"],
+                        description = [
+                            "Remove duplicate commits based on description.",
+                            "Commit IDs will be merged on same line.",
+                            "Default is: '\${DEFAULT-VALUE}'.",
+                            ""
+                        ])
+    private var removeDuplicate: Boolean = true
+
     @CommandLine.Option(names = ["-v", "--verbose"],
                         required = false,
                         description = ["print more information on console", "Default is: '\${DEFAULT-VALUE}'", ""])
@@ -155,7 +164,8 @@ class CoCoChaCmd : Runnable {
                                      gitCommitUrl,
                                      issueLink,
                                      issueUrl,
-                                     Pattern.compile(issueIdRegex, Pattern.DOTALL))
+                                     Pattern.compile(issueIdRegex, Pattern.DOTALL),
+                                     removeDuplicate)
         ChangelogGenerator(params).run()
     }
 }

@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Goal which touches a timestamp file.
+ * Generate a Changelog based on Conventional Commit format.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresProject = false)
 public class CoCoChaGenMojo
@@ -42,32 +42,32 @@ public class CoCoChaGenMojo
     /**
      * output changelog filename. If null result will display on stdout
      */
-    @Parameter(property = "cococha.outputFile", required = false, defaultValue = "target/CHANGELOG.md")
+    @Parameter(property = "cococha.outputFile", defaultValue = "target/CHANGELOG.md")
     String outputFile = "target/CHANGELOG.md";
 
     /**
      * Override if output already exists", "Default is: 'false'"
      */
-    @Parameter(property = "cococha.overrideExisting", defaultValue = "false", required = false)
+    @Parameter(property = "cococha.overrideExisting", defaultValue = "false")
     Boolean overrideExisting = false;
 
     /**
      * Append the output on top of an existing file, "Default is: 'false'"
      */
-    @Parameter(property = "cococha.appendToStart", defaultValue = "false", required = false)
+    @Parameter(property = "cococha.appendToStart", defaultValue = "false")
     Boolean appendToStart = false;
 
     /**
      * Last N releases to include into this changelog
      */
-    @Parameter(property = "cococha.releaseCount", defaultValue = "1", required = false)
+    @Parameter(property = "cococha.releaseCount", defaultValue = "1")
     Integer releaseCount = 1;
 
     /**
      * Filter only those commits type", "Default is: <b>'fix,feat,perf'</b>.<br/>
      * '<b>*</b>' is supported in order to include all type of commits
      */
-    @Parameter(property = "cococha.commitType", defaultValue = "fix,feat,perf", required = false)
+    @Parameter(property = "cococha.filterCommitTypes", defaultValue = "fix,feat,perf")
     List<String> filterCommitTypes = List.of(CommitType.BUG_FIX.getPrefix(),
             CommitType.FEAT.getPrefix(),
             CommitType.PERFORMANCE.getPrefix());
@@ -77,22 +77,22 @@ public class CoCoChaGenMojo
      * By default is automatically computed from last tag if you follow semantic versioning.<br/>
      * Option undefined means automatic release name.
      */
-    @Parameter(property = "cococha.releaseName", required = false)
+    @Parameter(property = "cococha.releaseName")
     String releaseName = null;
 
     /**
      * Append an issue link if an issue ID is found into short or full log message.
      * Default is: 'true'
      */
-    @Parameter(property = "cococha.issueLink", defaultValue = "true", required = false)
-    Boolean issueLink = true;
+    @Parameter(property = "cococha.addIssueLink", defaultValue = "true")
+    Boolean addIssueLink = true;
 
     /**
      * Tracker URL (Jira. github ...).
      * If a card/issue ID is found is will be tail at the end.
      * Option undefined means we'll used github.
      */
-    @Parameter(property = "cococha.issueUrl", required = false)
+    @Parameter(property = "cococha.issueUrl")
     String issueUrl = null;
 
     /**
@@ -116,7 +116,7 @@ public class CoCoChaGenMojo
      * Default is git style optionally with prefix 'Closes: '(([Cc][Ll][Oo][Ss][Ee][Ss][ 	]*:[ 	]*)?#(?<ID>\d+))'
      * </div>
      */
-    @Parameter(property = "cococha.issueIdRegex", required = false)
+    @Parameter(property = "cococha.issueIdRegex")
     String issueIdRegex = ChangelogGeneratorKt.getDefaultIssueRegex().pattern();
 
     /**
@@ -124,47 +124,35 @@ public class CoCoChaGenMojo
      * Used to override the default changelog template. We use <b>Mustache</b> engine.<br/>
      * Option undefined means we'll pick up the embedded one.
      */
-    @Parameter(property = "cococha.template", required = false)
+    @Parameter(property = "cococha.template")
     File template = null;
 
     /**
      * Add git commit URL for change log". Default is: 'true'
      */
-    @Parameter(property = "cococha.commitLink", defaultValue = "true", required = false)
-    Boolean commitLink = true;
+    @Parameter(property = "cococha.addCommitLink", defaultValue = "true")
+    Boolean addCommitLink = true;
 
     /**
      * Remote url prefix to build commit link (github, gitlab ...).<br/>
      * Option undefined means we'll try to read from git remote (origin/master).
      */
-    @Parameter(property = "cococha.gitCommitUrl", required = false)
+    @Parameter(property = "cococha.gitCommitUrl")
     String gitCommitUrl = null;
-
-//    /**
-//     * Print more information on console.
-//     * "Default is: 'false'
-//     */
-//    @Parameter(property = "gitCommitUrl", defaultValue = "false", required = false)
-//    private Boolean verbose = false;
 
     public void execute() throws MojoExecutionException {
         try {
-//            if (verbose) {
-//                //System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug")
-//                ch.qos.logback.classic.Logger l = org.slf4j.LoggerFactory.getLogger(getClass().getPackageName());
-//                l.level = Level.DEBUG
-//            }
-
-            GeneratorParams params = new GeneratorParams(template == null ? null : template.toPath(),
+            GeneratorParams params = new GeneratorParams(
+                    template == null ? null : template.toPath(),
                     overrideExisting,
                     appendToStart,
                     releaseName,
                     outputFile,
                     releaseCount,
                     filterCommitTypes.contains("*") ? Arrays.asList(CommitType.values().clone()) : filterCommitTypes.stream().map(v -> CommitType.Companion.of(v, null)).collect(Collectors.toList()),
-                    commitLink,
+                    addCommitLink,
                     gitCommitUrl,
-                    issueLink,
+                    addIssueLink,
                     issueUrl,
                     Pattern.compile(issueIdRegex, Pattern.DOTALL));
             new ChangelogGenerator(params).run();

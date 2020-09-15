@@ -29,7 +29,8 @@ data class GeneratorParams(var template: Path?,
                            val gitCommitUrl: String? = null,
                            val addIssueLink: Boolean = true,
                            val issueUrl: String? = null,
-                           val IssueIdRegex: Pattern = defaultIssueRegex) {
+                           val IssueIdRegex: Pattern = defaultIssueRegex,
+                           val removeDuplicate: Boolean = true) {
     fun getTemplateReader(): Reader {
         val t = template?.let {
             if (!Files.exists(it)) {
@@ -75,12 +76,14 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         logger.info { "Git commit URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
         logger.info { "Issue URL: '${if (params.addIssueLink) (issueUrl ?: "None") else "Disabled"}'" }
         logger.info { "Issue ID Regex: '${params.IssueIdRegex.pattern() ?: "None"}'" }
+        logger.info { "Remove duplicate commits: '${params.removeDuplicate}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
         val releases = gitService.parseCommit(params.releaseName!!,
                                               tags,
                                               params.releaseCount,
                                               params.filterCommitType,
-                                              params.IssueIdRegex)
+                                              params.IssueIdRegex,
+                                              params.removeDuplicate)
         val md = template.execute(Releases(releases, gitUrl, issueUrl))
 
         if (path == null) {
