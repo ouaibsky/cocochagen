@@ -4,8 +4,6 @@
     + [Maven: add to your build.](#maven--add-to-your-build)
     + [Gradle: add to your build.](#gradle--add-to-your-build)
     + [CLI](#cli)
-      - [Linux /Mac](#linux--mac)
-      - [Window](#window)
     + [Usage](#usage)
 - [Features](#features)
 - [Trouble Shooting](#trouble-shooting)
@@ -47,6 +45,7 @@ Can be renamed whatever.
           <configuration>
               <overrideExisting>true</overrideExisting>
               <releaseCount>5</releaseCount>
+              <filterCommitTypes>*</filterCommitTypes>
           </configuration>
       </plugin>
 ```
@@ -151,13 +150,13 @@ Conventional Commit Changelog Generator
 - [x] Option to add/hide: "commit ID", "issues ID", "Contributor".
 - [ ] Option to add/hide: "Contributor".
 - [ ] Option to customize Commit Type label (Features, ...)
-- [ ] Merge same commit msg and support many CommitID links
+- [x] Merge similar commits description and support many CommitID links per line.
 - [x] Do not override existing changelog. add option to force overriding.
 - [x] Generate changelog at beginning of an existing one.
 - [ ] Export report into json format
 - [x] Publish to maven central
 - [ ] Add Travis
-- [ ] Maven Plugin
+- [x] Maven Plugin
 - [ ] Gradle Plugin
 - [ ] Native CLI with GraalVM
 
