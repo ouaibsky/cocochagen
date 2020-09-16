@@ -24,14 +24,14 @@
 
 * Maven (all versions) 
 
-    * Download the executable jar from maven central (cocochagen-cli-x.y.z.jar).
+    * Download the executable jar from maven central (cocochagen-cli-1.0.4.jar).
 Can be renamed whatever.
 
         ```xml
         <dependency>
           <groupId>org.icroco.cocochagen</groupId>
           <artifactId>cocochagen-cli</artifactId>
-          <version>1.0.1</version>
+          <version>1.0.4</version>
         </dependency>
         ```
 
@@ -53,7 +53,7 @@ Can be renamed whatever.
 * Use maven help to list all parameters:
 > mvn help:describe -DgroupId=org.icroco.cocochagen -DartifactId=cocochagen-maven-plugin  -Ddetail
 
-* to ask for a giver version:
+* to ask for a given version:
 > mvn help:describe -DgroupId=org.icroco.cocochagen -DartifactId=cocochagen-maven-plugin -Dversion=1.0.4 -Ddetail
 
 * Have a look to [this example](./maven-plugin/examples/help/pom.xml) for all configuration properties.
@@ -77,9 +77,9 @@ or
 ### Usage
 
 ```bash
-Usage: cocochagen [-hvV] [--[no-]commit-link] [--[no-]issue-link] [-c=<releaseCount>] [-F=<template>] [-g=<gitCommitUrl>] [-i=<issueUrl>]
-                  [--issue-id-pattern=<issueIdRegex>] [-n=<releaseName>] [-o=<outputFile>] [-t=<commitType>[,<commitType>...]]...
-                  ([--output-override] | [--output-append-start])
+Usage: cococha [-hrvV] [--[no-]commit-link] [--[no-]issue-link] [-c=<releaseCount>] [-F=<template>] [-g=<gitCommitUrl>] [-i=<issueUrl>]
+               [--issue-id-pattern=<issueIdRegex>] [-n=<releaseName>] [-o=<outputFile>] [-t=<commitType>[,<commitType>...]]...
+               [[--output-override] | [--output-append-start]]
 Conventional Commit Changelog Generator
 
   -c, --release-count=<releaseCount>
@@ -114,7 +114,7 @@ Conventional Commit Changelog Generator
                                Advanced conventional commit: "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))"
                                Mix git and coco style: "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#?(?<ID>\\d+))"
                            Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
-                           Default is git style optionally with prefix 'Closes: ' '(([Cc][Ll][Oo][Ss][Ee][Ss][ 	]*:[ 	]*)?#(?<ID>\d+))'
+                           Default is git style optionally with prefix 'Closes: ' '(([Cc][Ll][Oo][Ss][Ee][Ss][  ]*:[    ]*)?#(?<ID>\d+))'
 
   -n, --release-name=<releaseName>
                            Provide the name of this release
@@ -137,6 +137,10 @@ Conventional Commit Changelog Generator
       --output-override    Override if output already exists
                            Default is: 'false'
 
+  -r, --remove-duplicate   Remove duplicate commits based on description.
+                           Commit IDs will be merged on same line.
+                           Default is: 'true'.
+
   -t, --commit-type=<commitType>[,<commitType>...]
                            Filter only those commits type
                            Default is: 'fix,feat,perf'
@@ -145,6 +149,7 @@ Conventional Commit Changelog Generator
                            Default is: 'false'
 
   -V, --version            Print version information and exit.
+
 ```
 
 # Features
@@ -156,22 +161,22 @@ Conventional Commit Changelog Generator
 - [x] Option to add your own Issuer URL (default is url based on git remote).
 - [x] Option to provide your own regex to match Issue ID.
 - [x] Option to add/hide: "commit ID", "issues ID", "Contributor".
-- [ ] Option to add/hide: "Contributor".
-- [ ] Option to customize Commit Type label (Features, ...)
+- [x] Maven Plugin.
 - [x] Merge similar commits description and support many CommitID links per line.
-- [x] Do not override existing changelog. add option to force overriding.
 - [x] Generate changelog at beginning of an existing one.
-- [ ] Export report into json format
-- [x] Publish to maven central
-- [ ] Add Travis
-- [x] Maven Plugin
-- [ ] Gradle Plugin
-- [ ] Native CLI with GraalVM
+- [x] Do not override existing changelog. add option to force overriding.
+- [x] Publish to maven central.
+- [ ] Option to add/hide: "Contributor".
+- [ ] Option to customize Commit Type label (Features, ...).
+- [ ] Export report into json format.
+- [ ] Add Travis.
+- [ ] Gradle Plugin.
+- [ ] Native CLI with GraalVM.
 
 # Trouble Shooting
-* Runtime working dir: be careful, right now you won't have same result if your run with **java -jar ...** ot **./cocochgen.jar**
+* Runtime working dir: be careful, right now you won't have same results if your run with **java -jar ...** ot **./cocochgen.jar**
     * with java -jar working dir is the current dir where you launch the command
-    * running like an executable **./cococha.jar**, the working dir will be where jar is located
+    * running like an executable **./cococha.jar**, the working dir will be where the jar is located.
     > example: './foo/bar/cocochagen.jar' is executing into the directory './foo/bar'
 * If your changelog looks not as expected (missing items,  ...), try to run with these options:
     > ./cococha.jar -t '*' -c 10
