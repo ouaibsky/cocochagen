@@ -1,0 +1,11 @@
+language: java
+
+jdk:
+  - openjdk14
+
+sudo: false # faster builds
+
+script: "./mvnw clean install"
+
+#after_success:
+#  - bash <(curl -s https://codecov.io/bash)
