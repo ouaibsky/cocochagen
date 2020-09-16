@@ -104,12 +104,13 @@ class GitService(baseDir: File? = null) {
                 if (removeDuplicate) {
                     val uQc = mutableMapOf<String, CommitDesc>()
                     cLogs.forEach { cd ->
-                        uQc.compute(cd.description) { _, v -> v?.addCommitIds(cd.commitIds) ?: v }
+                        uQc.compute(cd.description) { _, v -> v?.addCommitIds(cd.commitIds) ?: cd }
                     }
                     uQc.values
                 } else {
                     cLogs
-                }.sortedBy { it.component }
+                }
+                    .sortedBy { it.component }
             }
             .filter { e -> e.value.isNotEmpty() }
         val parseCommit = repository.parseCommit(to)

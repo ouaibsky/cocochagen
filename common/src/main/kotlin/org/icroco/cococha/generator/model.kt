@@ -40,9 +40,11 @@ data class CommitDesc(val type: CommitType,
                       val component: String?,
                       val description: String,
                       val issueIds: Set<String>,
-                      val commitIds: MutableSet<String>) {
+                      var commitIds: Set<String>) {
     fun addCommitIds(cId: Collection<String>): CommitDesc {
-        commitIds.addAll(cId)
+        val newV = commitIds.toMutableSet()
+        newV.addAll(cId)
+        commitIds = newV
         return this
     }
 }

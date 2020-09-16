@@ -134,6 +134,13 @@ public class CoCoChaGenMojo
     Boolean addCommitLink = true;
 
     /**
+     * Remove duplicate commit description. <br/>
+     * Issue Id or Commit Id will be merged on same line.
+     */
+    @Parameter(property = "cococha.removeDuplicate", defaultValue = "true")
+    Boolean removeDuplicate = true;
+
+    /**
      * Remote url prefix to build commit link (github, gitlab ...).<br/>
      * Option undefined means we'll try to read from git remote (origin/master).
      */
@@ -154,7 +161,8 @@ public class CoCoChaGenMojo
                     gitCommitUrl,
                     addIssueLink,
                     issueUrl,
-                    Pattern.compile(issueIdRegex, Pattern.DOTALL));
+                    Pattern.compile(issueIdRegex, Pattern.DOTALL),
+                    removeDuplicate);
             new ChangelogGenerator(params).run();
         } catch (Exception e) {
             throw new MojoExecutionException("Cococha generator failed", e);

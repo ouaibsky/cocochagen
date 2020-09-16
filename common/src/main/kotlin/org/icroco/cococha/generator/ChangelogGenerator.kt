@@ -77,6 +77,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         logger.info { "Issue URL: '${if (params.addIssueLink) (issueUrl ?: "None") else "Disabled"}'" }
         logger.info { "Issue ID Regex: '${params.IssueIdRegex.pattern() ?: "None"}'" }
         logger.info { "Remove duplicate commits: '${params.removeDuplicate}'" }
+        logger.info { "Mustache template: '${params.template ?: "embedded"}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
         val releases = gitService.parseCommit(params.releaseName!!,
                                               tags,

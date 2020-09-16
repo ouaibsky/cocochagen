@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.icroco.cocochagen.test</groupId>
+    <artifactId>basic</artifactId>
+    <version>0.0.1</version>
+    <packaging>pom</packaging>
+    <name>Convention Commit Changelog Generator Example</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.icroco.cocochagen</groupId>
+                <artifactId>cocochagen-maven-plugin</artifactId>
+                <version>1.0.4-SNAPSHOT</version>
+                <configuration>
+                    <outputFile>target/CHANGELOG.md</outputFile> <!-->Optional, default is one<-->
+                    <!--releaseName>foo</releaseName> Optional. Default is built from semantic versionning-->
+                    <releaseCount>5
+                    </releaseCount>  <!-->Optional, default is 1. Number of release to include in chage log<-->
+                    <overrideExisting>true</overrideExisting> <!-->Optional, default is true.<-->
+                    <appendToStart>false
+                    </appendToStart> <!-->Optional, default is false (can not be mix with overrideExisting.<-->
+                    <addCommitLink>true</addCommitLink> <!-->Optional, default is true.<-->
+                    <gitCommitUrl>http://mygit.link.com/commit/
+                    </gitCommitUrl> <!-->Optional, default url found into git remote.<-->
+                    <filterCommitTypes>*</filterCommitTypes> <!-->Optional, default is fix,feat,perf.<-->
+                    <addIssueLink>true</addIssueLink> <!-->Optional, default is true.<-->
+                    <issueUrl>http://myissuer.link.com
+                    </issueUrl> <!-->Optional, default url found into git remote, github issue.<-->
+                    <issueIdRegex>(Closes: (?&lt;ID&gt;JIRA-[0-9]+))
+                    </issueIdRegex><!-->Optional, default is semantic version '(Closes: (?<ID>JIRA-[0-9]+))'.<-->
+                    <template>resources/mytemplate.mustache</template> <!-->Optional, default is embedded one.<-->
+                    <removeDuplicate>true</removeDuplicate> <!-->Optional, default is true.<-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>example</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

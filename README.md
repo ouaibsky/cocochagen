@@ -39,9 +39,9 @@ Can be renamed whatever.
 
 ```xml
       <plugin>
-          <groupId>${project.groupId}</groupId>
+          <groupId>org.icroco.cocochagen</groupId>
           <artifactId>cocochagen-maven-plugin</artifactId>
-          <version>X.Y.Z</version>
+          <version>1.0.4</version>
           <configuration>
               <overrideExisting>true</overrideExisting>
               <releaseCount>5</releaseCount>
@@ -49,6 +49,14 @@ Can be renamed whatever.
           </configuration>
       </plugin>
 ```
+
+* Use maven help to list all parameters:
+> mvn help:describe -DgroupId=org.icroco.cocochagen -DartifactId=cocochagen-maven-plugin  -Ddetail
+
+* to ask for a giver version:
+> mvn help:describe -DgroupId=org.icroco.cocochagen -DartifactId=cocochagen-maven-plugin -Dversion=1.0.4 -Ddetail
+
+* Have a look to [this example](./maven-plugin/examples/help/pom.xml) for all configuration properties.
 
 ### Gradle: add to your build.
 

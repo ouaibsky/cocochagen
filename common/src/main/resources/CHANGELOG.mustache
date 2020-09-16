@@ -4,7 +4,7 @@
 {{/header}}
 {{#releases}}{{#-first}}#{{/-first}}{{^-first}}##{{/-first}} {{name}} ({{#date}}{{this}}{{/date}})
 {{#categories}}### {{name}}
-{{#messages}}* {{#component}}**{{.}}:** {{/component}}{{description}} {{#issueIds}}{{#-first}}(Card: {{/-first}}{{^-first}}, {{/-first}}[{{this}}]({{issueUrl}}{{this}}{{#-last}}){{/-last}}){{/issueIds}} {{#gitUrl}}{{#commitId}}([{{this}}]({{gitUrl}}{{this}})){{/commitId}}{{/gitUrl}}
+{{#messages}}* {{#component}}**{{.}}:** {{/component}}{{description}} {{#issueIds}}{{#-first}}(Card: {{/-first}}{{^-first}}, {{/-first}}[{{this}}]({{issueUrl}}{{this}}{{#-last}}){{/-last}}){{/issueIds}} {{#commitIds}}{{#-first}}({{/-first}}{{^-first}}, {{/-first}}[{{this}}]({{gitUrl}}{{this}}){{#-last}}){{/-last}}{{/commitIds}}
 {{/messages}}
 
 {{/categories}}

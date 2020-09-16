@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.icroco.cocochagen</groupId>
     <artifactId>cocochagen-parent</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <name>cocochagen-parent</name>
     <description>Conventional Commit Changelog Generator</description>
     <packaging>pom</packaging>
