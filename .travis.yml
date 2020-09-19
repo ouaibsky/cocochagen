@@ -5,7 +5,9 @@ jdk:
 
 sudo: false # faster builds
 
-script: "./mvnw clean install"
+script: 
+  - "./mvnw clean install"
+  - "./mvnw -pl maven-plugin site install"
 
 #after_success:
 #  - bash <(curl -s https://codecov.io/bash)
