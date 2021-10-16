@@ -1,7 +1,7 @@
 package org.icroco.cococha.generator
 
 import com.samskivert.mustache.Mustache
-import mu.KLogging
+import mu.KotlinLogging
 import org.icroco.cococha.generator.git.GitService
 import org.icroco.cococha.generator.git.VersionTag
 import java.io.FileReader
@@ -13,24 +13,33 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.regex.Pattern
 
-val defaultIssueRegex: Pattern = Pattern.compile("(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))",
-                                                 Pattern.DOTALL)
+private val logger = KotlinLogging.logger {}
 
-data class GeneratorParams(var template: Path?,
-                           var overrideExisting: Boolean = false,
-                           var appendToStart: Boolean = false,
-                           var releaseName: String?,
-                           val outputFile: String?,
-                           val releaseCount: Int = 1,
-                           val filterCommitType: List<CommitType> = listOf(CommitType.BUG_FIX,
-                                                                           CommitType.FEAT,
-                                                                           CommitType.PERFORMANCE),
-                           val addCommitLink: Boolean = true,
-                           val gitCommitUrl: String? = null,
-                           val addIssueLink: Boolean = true,
-                           val issueUrl: String? = null,
-                           val IssueIdRegex: Pattern = defaultIssueRegex,
-                           val removeDuplicate: Boolean = true) {
+val defaultIssueRegex: Pattern = Pattern.compile(
+    "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))",
+    Pattern.DOTALL
+)
+
+data class GeneratorParams(
+    var template: Path?,
+    var overrideExisting: Boolean = false,
+    var appendToStart: Boolean = false,
+    var releaseName: String?,
+    val outputFile: String?,
+    val releaseCount: Int = 1,
+    val filterCommitType: List<CommitType> = listOf(
+        CommitType.BUG_FIX,
+        CommitType.FEAT,
+        CommitType.PERFORMANCE
+    ),
+    val addCommitLink: Boolean = true,
+    val gitCommitUrl: String? = null,
+    val addIssueLink: Boolean = true,
+    val issueUrl: String? = null,
+    val IssueIdRegex: Pattern = defaultIssueRegex,
+    val removeDuplicate: Boolean = true,
+    val fetchTags: Boolean = false
+) {
     fun getTemplateReader(): Reader {
         val t = template?.let {
             if (!Files.exists(it)) {
@@ -44,8 +53,6 @@ data class GeneratorParams(var template: Path?,
 }
 
 class ChangelogGenerator(private val params: GeneratorParams) {
-    private companion object : KLogging()
-
     private val gitService = GitService()
 
     fun run() {
@@ -62,9 +69,9 @@ class ChangelogGenerator(private val params: GeneratorParams) {
 
         params.releaseName = buildReleaseName(tags)
         val gitUrl = if (params.addCommitLink) params.gitCommitUrl
-                ?: gitService.getGitRemoteUrl() + "/commit/" else null
+            ?: (gitService.getGitRemoteUrl() + "/commit/") else null
         val issueUrl = if (params.addIssueLink) params.issueUrl
-                ?: gitService.getGitRemoteUrl() + "/issues/" else null
+            ?: (gitService.getGitRemoteUrl() + "/issues/") else null
 
         val path: Path? = if (params.outputFile != null) Paths.get(params.outputFile).toAbsolutePath() else null
         logger.info { "Output file is: '${path?.toAbsolutePath() ?: "stdout"}'" }
@@ -72,6 +79,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         logger.info { "Output append at start: '${params.appendToStart}'" }
         logger.info { "Release name is: '${params.releaseName}'" }
         logger.info { "Release Count is: '${params.releaseCount}'" }
+        logger.info { "Fetch all tags is: '${params.fetchTags}'" }
         logger.info { "Filter commit log with: '${params.filterCommitType.joinToString(",") { it.prefix }}'" }
         logger.info { "Git commit URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
         logger.info { "Issue URL: '${if (params.addIssueLink) (issueUrl ?: "None") else "Disabled"}'" }

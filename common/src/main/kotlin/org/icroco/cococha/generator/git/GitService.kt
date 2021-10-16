@@ -8,6 +8,7 @@ import org.icroco.cococha.generator.CommitDesc
 import org.icroco.cococha.generator.CommitType
 import org.icroco.cococha.generator.Release
 import java.io.File
+import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -68,6 +69,7 @@ class GitService(baseDir: File? = null) {
     private val typePattern = Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*)?:\\s*(?<D>.*)")
 
     fun getTags(): List<VersionTag> {
+//        git.fetch().setTagOpt(TagOpt.FETCH_TAGS).call().
         return git.tagList()
             .call()
             .asSequence()
@@ -131,12 +133,16 @@ class GitService(baseDir: File? = null) {
         if (matcher.matches()) {
             cDesc = matcher.group("D")
             cType = CommitType.of(matcher.group("T"))
-            cComponent = matcher.group("C")?.replace("_", " ")?.capitalize()
+            cComponent =
+                matcher.group("C")
+                    ?.replace("_", " ")
+                    ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
         }
 
-        cDesc = (if (cDesc.isBlank()) rm.fullMessage?.lines()?.first() ?: "No Commit Msg" else cDesc).trim()
+        cDesc = (cDesc.ifBlank { rm.fullMessage?.lines()?.first() ?: "No Commit Msg" }).trim()
         val pair = getIds(cDesc, issueIdRegex.matcher(rm.shortMessage), issueIdRegex.matcher(rm.fullMessage))
-        cDesc = pair.first.trim().capitalize()
+        cDesc = pair.first.trim()
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
         cDesc = if (cDesc.endsWith(".")) cDesc else "${cDesc}."
 
         return CommitDesc(cType, cComponent, cDesc, pair.second, mutableSetOf(rm.id.abbreviate(8).name()))

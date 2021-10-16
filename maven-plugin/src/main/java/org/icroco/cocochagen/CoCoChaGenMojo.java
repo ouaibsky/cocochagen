@@ -21,6 +21,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.icroco.cococha.generator.ChangelogGenerator;
 import org.icroco.cococha.generator.ChangelogGeneratorKt;
 import org.icroco.cococha.generator.CommitType;
@@ -32,18 +33,22 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+
 /**
  * Generate a Changelog based on Conventional Commit format.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresProject = false)
 public class CoCoChaGenMojo
         extends AbstractMojo {
+    @Parameter(defaultValue = "${project}", readonly = true)
+    private MavenProject project;
 
     /**
      * output changelog filename. If null result will display on stdout
      */
-    @Parameter(property = "cococha.outputFile", defaultValue = "target/CHANGELOG.md")
-    String outputFile = "target/CHANGELOG.md";
+    @Parameter(property = "cococha.outputFile", defaultValue = "CHANGELOG.md")
+    String outputFile = "CHANGELOG.md";
 
     /**
      * Override if output already exists", "Default is: 'false'"
@@ -147,6 +152,12 @@ public class CoCoChaGenMojo
     @Parameter(property = "cococha.gitCommitUrl")
     String gitCommitUrl = null;
 
+    /**
+     * For to fetch all available tags. Depending of you repository it can be long,
+     */
+    @Parameter(property = "cococha.fetchTags", defaultValue = "false")
+    Boolean fetchTags = false;
+
     public void execute() throws MojoExecutionException {
         try {
             GeneratorParams params = new GeneratorParams(
@@ -154,15 +165,20 @@ public class CoCoChaGenMojo
                     overrideExisting,
                     appendToStart,
                     releaseName,
-                    outputFile,
+                    ofNullable(project).map(MavenProject::getBasedir)
+                            .orElseGet(() -> new File(".")).toString() + "/" + outputFile,
                     releaseCount,
-                    filterCommitTypes.contains("*") ? Arrays.asList(CommitType.values().clone()) : filterCommitTypes.stream().map(v -> CommitType.Companion.of(v, null)).collect(Collectors.toList()),
+                    filterCommitTypes.contains("*")
+                            ? Arrays.asList(CommitType.values().clone())
+                            : filterCommitTypes.stream()
+                            .map(v -> CommitType.Companion.of(v, null)).collect(Collectors.toList()),
                     addCommitLink,
                     gitCommitUrl,
                     addIssueLink,
                     issueUrl,
                     Pattern.compile(issueIdRegex, Pattern.DOTALL),
-                    removeDuplicate);
+                    removeDuplicate,
+                    fetchTags);
             new ChangelogGenerator(params).run();
         } catch (Exception e) {
             throw new MojoExecutionException("Cococha generator failed", e);

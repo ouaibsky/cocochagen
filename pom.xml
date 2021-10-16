@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.icroco.cocochagen</groupId>
     <artifactId>cocochagen-parent</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <name>cocochagen-parent</name>
     <description>Conventional Commit Changelog Generator</description>
     <packaging>pom</packaging>
@@ -54,17 +54,17 @@
     </distributionManagement>
 
     <properties>
-        <java.version>14</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.4.0</kotlin.version>
+        <kotlin.version>1.6.0-RC</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
-        <spring-boot.version>2.3.3.RELEASE</spring-boot.version>
-        <kotlin-logging.version>1.8.3</kotlin-logging.version>
-        <slf4j-api.version>2.0.0-alpha1</slf4j-api.version>
+        <spring-boot.version>2.4.5</spring-boot.version>
+        <kotlin-logging.version>2.0.10</kotlin-logging.version>
+        <slf4j-api.version>2.0.0-alpha5</slf4j-api.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-        <dokka.version>1.4.0</dokka.version>
+        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+        <dokka.version>1.5.31</dokka.version>
     </properties>
 
     <dependencyManagement>
@@ -76,7 +76,7 @@
             </dependency>
             <dependency>
                 <groupId>io.github.microutils</groupId>
-                <artifactId>kotlin-logging</artifactId>
+                <artifactId>kotlin-logging-jvm</artifactId>
                 <version>${kotlin-logging.version}</version>
                 <exclusions>
                     <exclusion>
@@ -127,6 +127,9 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <skip>false</skip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

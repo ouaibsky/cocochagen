@@ -169,7 +169,7 @@ Conventional Commit Changelog Generator
 - [ ] Option to add/hide: "Contributor".
 - [ ] Option to customize Commit Type label (Features, ...).
 - [ ] Export report into json format.
-- [ ] Add Travis.
+- [ ] Add github actions.
 - [ ] Gradle Plugin.
 - [ ] Native CLI with GraalVM.
 

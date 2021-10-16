@@ -18,21 +18,21 @@ enum class CommitType(val displayPriority: Int, val prefix: String, val fullName
     UNKNOWN(1000, "unknown", "Others");
 
     companion object {
-        public fun of(value: String, defaultValue: CommitType? = null): CommitType {
+        fun of(value: String, defaultValue: CommitType? = null): CommitType {
             for (type in values()) {
                 if (type.prefix.equals(value, true)) {
                     return type
                 }
             }
             return defaultValue
-                    ?: throw IllegalStateException("Unknown commit type: '$value'. values: '${buildPattern()}'")
+                ?: throw IllegalStateException("Unknown commit type: '$value'. values: '${buildPattern()}'")
         }
 
         fun buildPattern(): String {
             return values().joinToString("|") { it.prefix }
         }
 
-        val sortByPrio = compareBy<CommitType>() { it.displayPriority }
+        val sortByPrio = compareBy<CommitType> { it.displayPriority }
     }
 }
 
