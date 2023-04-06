@@ -1,0 +1,77 @@
+# gpg help: from https://github.com/marketplace/actions/import-gpg
+
+name: Maven CI/CD
+
+on:
+  push:
+    branches: [ main ]
+#    pull_request:
+#      branches: [ main ]
+
+jobs:
+  Build_and_test:
+
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          fingerprint: "818D3AE5CA5FA7DE94EAB67EA62BBEF5FDE0F726"
+      #      - name: List keys
+      #        run: gpg -K
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: maven
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Maven bump version
+        run: ./mvnw -B build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}'
+
+      - name: Get version
+        run: |
+          MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+          echo "::set-output name=version::$MVN_VERSION"
+        id: get_version
+
+      - name: Maven build
+        run: ./mvnw -B -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} clean package deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+
+      - name: Commit version
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Christophe
+          author_email: ouaibsky@gmail.com
+          message: "Release v${{ steps.get_version.outputs.version }} [skip ci]"
+          add: 'pom.xml'
+
+      - name: Maven next version
+        run: ./mvnw -B build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT'
+
+      - name: Get new version
+        run: |
+          MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+          echo "::set-output name=version::$MVN_VERSION"
+        id: get_new_version
+
+      - name: Commit version
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Christophe
+          author_email: ouaibsky@gmail.com
+          message: "Next Version v${{ steps.get_new_version.outputs.version }} [skip ci]"
+          add: 'pom.xml'

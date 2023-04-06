@@ -147,7 +147,7 @@ class CoCoChaCmd : Runnable {
 
     override fun run() {
         if (verbose) {
-            //System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug")
+//            System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug")
             val l = org.slf4j.LoggerFactory.getLogger(javaClass.packageName) as ch.qos.logback.classic.Logger
             l.level = Level.DEBUG
         }

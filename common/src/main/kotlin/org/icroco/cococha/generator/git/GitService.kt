@@ -69,7 +69,7 @@ class GitService(baseDir: File? = null) {
     private val typePattern = Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*)?:\\s*(?<D>.*)")
 
     fun getTags(): List<VersionTag> {
-//        git.fetch().setTagOpt(TagOpt.FETCH_TAGS).call().
+//        git.fetch().setTagOpt(TagOpt.FETCH_TAGS).call();
         return git.tagList()
             .call()
             .asSequence()
