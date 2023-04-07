@@ -3,6 +3,8 @@
 name: Maven CI/CD
 
 on:
+  workflow_dispatch:
+
   push:
     branches: [ master ]
   pull_request:
@@ -26,7 +28,7 @@ jobs:
       #      - name: List keys
       #        run: gpg -K
 
-      - name: Set up JDK 19
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: 17
