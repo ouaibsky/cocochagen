@@ -56,11 +56,11 @@ class ChangelogGenerator(private val params: GeneratorParams) {
     private val gitService = GitService()
 
     fun run() {
-        params.template = params.template?.let {
-            if (!Files.exists(it)) {
-                throw IllegalArgumentException("Template file doesn't exist: '$it'")
+        params.template = params.template?.let { path ->
+            if (!Files.exists(path)) {
+                throw IllegalArgumentException("Template file doesn't exist: '$path'")
             }
-            it
+            path
         }
         var tags = gitService.getTags()
         if (params.releaseCount >= 1) {
@@ -103,7 +103,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
             if (params.appendToStart && params.overrideExisting) {
                 throw IllegalArgumentException("Option to override and append are exclusive, both cannot be true")
             }
-            if (path.toFile().isDirectory) {
+            if (Files.isDirectory(path)) {
                 throw IllegalArgumentException("Output cannot be a directory: '$path'")
             }
             path.parent.toFile().mkdirs()
@@ -140,7 +140,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
             if (tags.isEmpty())
                 VersionTag(0, 0, 1).toString()
             else
-                tags.first().nextVersion().toString()
+                (tags.firstOrNull(VersionTag::isSemantic)?.nextVersion() ?: VersionTag(0, 0, 1)).toString()
         } else {
             null
         }

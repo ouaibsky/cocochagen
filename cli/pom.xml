@@ -10,6 +10,9 @@
     <artifactId>cocochagen-cli</artifactId>
     <name>cocochagen-cli</name>
     <description>Command Line Interface for Conventional Commit Changelog Generator</description>
+    <properties>
+        <picocli.version>4.7.1</picocli.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -39,12 +42,12 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.5.0</version>
+            <version>${picocli.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.3.0-alpha5</version>
+            <version>${logback-classic.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
@@ -102,7 +105,7 @@
                                 <annotationProcessorPath>
                                     <groupId>info.picocli</groupId>
                                     <artifactId>picocli-codegen</artifactId>
-                                    <version>4.5.0</version>
+                                    <version>${picocli.version}</version>
                                 </annotationProcessorPath>
                             </annotationProcessorPaths>
                         </configuration>
@@ -148,7 +151,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>${exec-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>generate-autocompletion-script</id>

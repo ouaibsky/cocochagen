@@ -79,7 +79,7 @@ public class CoCoChaGenMojo
 
     /**
      * Provide the name of this release.<br/>
-     * By default is automatically computed from last tag if you follow semantic versioning.<br/>
+     * By default, it's automatically computed from last tag follow semantic versioning.<br/>
      * Option undefined means automatic release name.
      */
     @Parameter(property = "cococha.releaseName")
@@ -95,14 +95,14 @@ public class CoCoChaGenMojo
     /**
      * Tracker URL (Jira. github ...).
      * If a card/issue ID is found is will be tail at the end.
-     * Option undefined means we'll used github.
+     * Option undefined means we'll use GitHub.
      */
     @Parameter(property = "cococha.issueUrl")
     String issueUrl = null;
 
     /**
-     * If a card ID is found it will be append at the end of tracker url.<br/>
-     * Regex must contains 1 global group and 1 named capturing groups:<br/>
+     * If a card ID is found it will be appended at the end of tracker url.<br/>
+     * Regex must contain 1 global group and 1 named capturing groups:<br/>
      * <ul style="PADDING-LEFT: 12px">
      *     <li>A global one used to identify an entirely issue id (ex: Closes: #1234).</li>
      *     <li>Second one is named 'ID', used to extract the id that will be appended after issueUrl (ex: 1234),</li>
@@ -153,12 +153,22 @@ public class CoCoChaGenMojo
     String gitCommitUrl = null;
 
     /**
-     * For to fetch all available tags. Depending of you repository it can be long,
+     * For to fetch all available tags. Depending on your repository it can be long.
      */
     @Parameter(property = "cococha.fetchTags", defaultValue = "false")
     Boolean fetchTags = false;
 
+    /**
+     * Skip plugin processing.
+     * Default is: 'false'
+     */
+    @Parameter(property = "cococha.skip", defaultValue = "false")
+    Boolean skip = false;
+
     public void execute() throws MojoExecutionException {
+        if (skip) {
+            return;
+        }
         try {
             GeneratorParams params = new GeneratorParams(
                     template == null ? null : template.toPath(),

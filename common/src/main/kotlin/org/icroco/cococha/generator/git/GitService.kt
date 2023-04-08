@@ -28,8 +28,8 @@ data class VersionTag(val major: Int,
     constructor(ref: Ref) : this(-1, -1, -1, ref) {
     }
 
-    private fun isSemantic(): Boolean {
-        return major >= 0 && minor >= 0 && minor >= 0
+    fun isSemantic(): Boolean {
+        return major >= 0 && minor >= 0 && build >= 0
     }
 
     override fun toString(): String {
