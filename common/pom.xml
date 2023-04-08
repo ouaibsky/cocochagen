@@ -10,7 +10,9 @@
     <artifactId>cocochagen-common</artifactId>
     <name>cocochagen-common</name>
     <description>Common stuff used by other modules</description>
-
+    <properties>
+        <org.eclipse.jgit.version>6.5.0.202303070854-r</org.eclipse.jgit.version>
+    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>

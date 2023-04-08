@@ -12,6 +12,8 @@
     <description>Command Line Interface for Conventional Commit Changelog Generator</description>
     <properties>
         <picocli.version>4.7.1</picocli.version>
+        <logback-classic.version>1.4.6</logback-classic.version>
+        <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
