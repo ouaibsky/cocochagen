@@ -3,77 +3,77 @@
 name: Maven CI/CD
 
 on:
-  workflow_dispatch:
+    workflow_dispatch:
 
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
 
 jobs:
-  Build_and_test:
+    Build_and_test:
 
-    runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+        runs-on: ubuntu-latest
+        if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          fingerprint: "818D3AE5CA5FA7DE94EAB67EA62BBEF5FDE0F726"
-      #      - name: List keys
-      #        run: gpg -K
+        steps:
+            -   uses: actions/checkout@v3
+            -   name: Import GPG key
+                id: import_gpg
+                uses: crazy-max/ghaction-import-gpg@v5
+                with:
+                    gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+                    passphrase: ${{ secrets.GPG_PASSPHRASE }}
+                    fingerprint: "818D3AE5CA5FA7DE94EAB67EA62BBEF5FDE0F726"
+            #      - name: List keys
+            #        run: gpg -K
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: temurin
-          cache: maven
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+            -   name: Set up JDK 17
+                uses: actions/setup-java@v3
+                with:
+                    java-version: 17
+                    distribution: temurin
+                    cache: maven
+                    server-id: ossrh
+                    server-username: MAVEN_USERNAME
+                    server-password: MAVEN_PASSWORD
 
-      - name: Maven bump version
-        run: ./mvnw -B build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}'
+            -   name: Maven bump version
+                run: ./mvnw -B build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}'
 
-      - name: Get version
-        run: |
-          MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
-          echo "::set-output name=version::$MVN_VERSION"
-        id: get_version
+            -   name: Get version
+                run: |
+                    MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+                    echo "::set-output name=version::$MVN_VERSION"
+                id: get_version
 
-      - name: Maven build
-        run: ./mvnw -B -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} clean package deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+            -   name: Maven build
+                run: ./mvnw -B -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} clean package deploy
+                env:
+                    MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+                    MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
-      - name: Commit version
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: Christophe
-          author_email: ouaibsky@gmail.com
-          message: "Release v${{ steps.get_version.outputs.version }} [skip ci]"
-          add: 'pom.xml'
+            -   name: Commit version
+                uses: EndBug/add-and-commit@v9
+                with:
+                    author_name: Christophe
+                    author_email: ouaibsky@gmail.com
+                    message: "Release v${{ steps.get_version.outputs.version }} [skip ci]"
+                    add: 'pom.xml'
 
-      - name: Maven next version
-        run: ./mvnw -B build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT'
+            -   name: Maven next version
+                run: ./mvnw -B build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT'
 
-      - name: Get new version
-        run: |
-          MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
-          echo "::set-output name=version::$MVN_VERSION"
-        id: get_new_version
+            -   name: Get new version
+                run: |
+                    MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+                    echo "::set-output name=version::$MVN_VERSION"
+                id: get_new_version
 
-      - name: Commit version
-        uses: EndBug/add-and-commit@v9
-        with:
-            author_name: Christophe
-          author_email: ouaibsky@gmail.com
-          message: "Next Version v${{ steps.get_new_version.outputs.version }} [skip ci]"
-            add: 'pom.xml common/pom.xml cli/pom.xml maven-plugin/pom.xml'
+            -   name: Commit version
+                uses: EndBug/add-and-commit@v9
+                with:
+                    author_name: Christophe
+                    author_email: ouaibsky@gmail.com
+                    message: "Next Version v${{ steps.get_new_version.outputs.version }} [skip ci]"
+                    add: 'pom.xml common/pom.xml cli/pom.xml maven-plugin/pom.xml'
