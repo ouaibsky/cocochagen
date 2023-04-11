@@ -73,7 +73,7 @@ jobs:
       - name: Commit version
         uses: EndBug/add-and-commit@v9
         with:
-          author_name: Christophe
+            author_name: Christophe
           author_email: ouaibsky@gmail.com
           message: "Next Version v${{ steps.get_new_version.outputs.version }} [skip ci]"
-          add: 'pom.xml'
+          add: 'pom.xml' 'common/pom.xml' 'cli/pom.xml' 'maven-plugin/pom.xml'

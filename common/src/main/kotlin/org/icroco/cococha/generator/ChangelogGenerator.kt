@@ -68,16 +68,15 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         }
 
         params.releaseName = buildReleaseName(tags)
-        val gitUrl = if (params.addCommitLink) params.gitCommitUrl
-            ?: (gitService.getGitRemoteUrl() + "/commit/") else null
-        val issueUrl = if (params.addIssueLink) params.issueUrl
-            ?: (gitService.getGitRemoteUrl() + "/issues/") else null
+        val gitUrl =
+                if (params.addCommitLink) params.gitCommitUrl ?: (gitService.getGitRemoteUrl() + "/commit/") else null
+        val issueUrl = if (params.addIssueLink) params.issueUrl ?: (gitService.getGitRemoteUrl() + "/issues/") else null
 
         val path: Path? = if (params.outputFile != null) Paths.get(params.outputFile).toAbsolutePath() else null
         logger.info { "Output file is: '${path?.toAbsolutePath() ?: "stdout"}'" }
         logger.info { "Output override existing is: '${params.overrideExisting}'" }
         logger.info { "Output append at start: '${params.appendToStart}'" }
-        logger.info { "Release name is: '${params.releaseName}'" }
+        logger.info { "Last Release name is: '${params.releaseName}'" }
         logger.info { "Release Count is: '${params.releaseCount}'" }
         logger.info { "Fetch all tags is: '${params.fetchTags}'" }
         logger.info { "Filter commit log with: '${params.filterCommitType.joinToString(",") { it.prefix }}'" }

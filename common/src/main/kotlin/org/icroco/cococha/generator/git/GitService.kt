@@ -48,12 +48,12 @@ data class VersionTag(val major: Int,
     }
 
     fun nextVersion(plusMajor: Boolean = false, plusMinor: Boolean = false, plusBuild: Boolean = true): VersionTag {
-        return if (isSemantic()) VersionTag(
-                if (plusMajor) major + 1 else major,
-                if (plusMinor) minor + 1 else minor,
-                if (plusBuild) build + 1 else build,
-                ref)
-        else throw IllegalArgumentException("Can not create automatuc version number fron non semantic version")
+        return if (isSemantic())
+            VersionTag(if (plusMajor) major + 1 else major,
+                       if (plusMinor) minor + 1 else minor,
+                       if (plusBuild) build + 1 else build,
+                       ref)
+        else throw IllegalArgumentException("Can not create automatic version number from non semantic version: '$major.$minor.$build'")
     }
 }
 
@@ -61,26 +61,27 @@ class GitService(baseDir: File? = null) {
     private companion object : KLogging()
 
     private val repository: Repository = RepositoryBuilder()
-        .readEnvironment()
-        .findGitDir(baseDir ?: File("").absoluteFile)
-        .build()
+            .readEnvironment()
+            .findGitDir(baseDir ?: File("").absoluteFile)
+            .build()
     private val git = Git(repository)
     private val tagPattern = Pattern.compile("refs/tags/(v(\\d+)\\.(\\d+)\\.(\\d+))")
-    private val typePattern = Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*)?:\\s*(?<D>.*)")
+    private val typePattern =
+            Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*)?:\\s*(?<D>.*)")
 
     fun getTags(): List<VersionTag> {
 //        git.fetch().setTagOpt(TagOpt.FETCH_TAGS).call();
         return git.tagList()
-            .call()
-            .asSequence()
-            .sortedByDescending { ref -> repository.parseCommit(ref.getSafeObjectId()).commitTime }
-            .map { r: Ref ->
-                val m = tagPattern.matcher(r.name)
-                logger.debug { "Found tag: '$r'" + (if (m.matches()) "" else " Non conventional tag, will be ignored for release auto naming") }
-                if (m.matches()) VersionTag(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), r)
-                else VersionTag(r)
-            }
-            .toList()
+                .call()
+                .asSequence()
+                .sortedByDescending { ref -> repository.parseCommit(ref.getSafeObjectId()).commitTime }
+                .map { r: Ref ->
+                    val m = tagPattern.matcher(r.name)
+                    logger.debug { "Found tag: '$r'" + (if (m.matches()) "" else " Non conventional tag, will be ignored for release auto naming") }
+                    if (m.matches()) VersionTag(m.group(2).toInt(), m.group(3).toInt(), m.group(4).toInt(), r)
+                    else VersionTag(r)
+                }
+                .toList()
     }
 
     private fun getCommitRange(releaseName: String,
@@ -97,24 +98,24 @@ class GitService(baseDir: File? = null) {
 
         val log = git.log()
         val commits = log.addRange(from, to)
-            .call()
-            .mapNotNull { rm -> toConventionalCommit(rm, issueIdRegex) }
-            .groupBy { it.type }
-            .toSortedMap(CommitType.sortByPrio)
-            .mapValues { e ->
-                val cLogs = e.value.filter { cd -> filterCommitType.contains(cd.type) }
-                if (removeDuplicate) {
-                    val uQc = mutableMapOf<String, CommitDesc>()
-                    cLogs.forEach { cd ->
-                        uQc.compute(cd.description) { _, v -> v?.addCommitIds(cd.commitIds) ?: cd }
+                .call()
+                .mapNotNull { rm -> toConventionalCommit(rm, issueIdRegex) }
+                .groupBy { it.type }
+                .toSortedMap(CommitType.sortByPrio)
+                .mapValues { e ->
+                    val cLogs = e.value.filter { cd -> filterCommitType.contains(cd.type) }
+                    if (removeDuplicate) {
+                        val uQc = mutableMapOf<String, CommitDesc>()
+                        cLogs.forEach { cd ->
+                            uQc.compute(cd.description) { _, v -> v?.addCommitIds(cd.commitIds) ?: cd }
+                        }
+                        uQc.values
+                    } else {
+                        cLogs
                     }
-                    uQc.values
-                } else {
-                    cLogs
+                            .sortedBy { it.component }
                 }
-                    .sortedBy { it.component }
-            }
-            .filter { e -> e.value.isNotEmpty() }
+                .filter { e -> e.value.isNotEmpty() }
         val parseCommit = repository.parseCommit(to)
         val authorDate = parseCommit.authorIdent.getWhen()
         val authorTimeZone = parseCommit.authorIdent.timeZone.toZoneId()
@@ -134,15 +135,15 @@ class GitService(baseDir: File? = null) {
             cDesc = matcher.group("D")
             cType = CommitType.of(matcher.group("T"))
             cComponent =
-                matcher.group("C")
-                    ?.replace("_", " ")
-                    ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                    matcher.group("C")
+                            ?.replace("_", " ")
+                            ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
         }
 
         cDesc = (cDesc.ifBlank { rm.fullMessage?.lines()?.first() ?: "No Commit Msg" }).trim()
         val pair = getIds(cDesc, issueIdRegex.matcher(rm.shortMessage), issueIdRegex.matcher(rm.fullMessage))
         cDesc = pair.first.trim()
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
         cDesc = if (cDesc.endsWith(".")) cDesc else "${cDesc}."
 
         return CommitDesc(cType, cComponent, cDesc, pair.second, mutableSetOf(rm.id.abbreviate(8).name()))
@@ -167,7 +168,20 @@ class GitService(baseDir: File? = null) {
     }
 
     fun getGitRemoteUrl(): String? {
-        return repository.config.getString("remote", "origin", "url")?.replace("\\.git\$".toRegex(), "")
+        val currentBranch = repository.branch
+        val trackingStatus = BranchTrackingStatus.of(repository, currentBranch)
+        val remoteTrackingBr: String? = trackingStatus?.remoteTrackingBranch;
+        val remoteName = if (remoteTrackingBr == null) {
+            val remotes = repository.remoteNames.toSet()
+            if (remotes.size > 1) {
+                "origin"
+            } else {
+                remotes.first()
+            }
+        } else {
+            remoteTrackingBr.split("/")[2]
+        }
+        return repository.config.getString("remote", remoteName, "url")?.replace("\\.git\$".toRegex(), "")
     }
 
     fun parseCommit(relName: String,

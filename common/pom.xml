@@ -5,20 +5,23 @@
     <parent>
         <groupId>org.icroco.cocochagen</groupId>
         <artifactId>cocochagen-parent</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.2-SNAPSHOT</version>
     </parent>
     <artifactId>cocochagen-common</artifactId>
     <name>cocochagen-common</name>
     <description>Common stuff used by other modules</description>
     <properties>
         <org.eclipse.jgit.version>6.5.0.202303070854-r</org.eclipse.jgit.version>
+        <jmustache.version>1.15</jmustache.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-parent</artifactId>
+                <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -55,7 +58,12 @@
         <dependency>
             <groupId>com.samskivert</groupId>
             <artifactId>jmustache</artifactId>
-            <version>1.15</version>
+            <version>${jmustache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

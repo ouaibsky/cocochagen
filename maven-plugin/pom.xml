@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.icroco.cocochagen</groupId>
         <artifactId>cocochagen-parent</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.2-SNAPSHOT</version>
     </parent>
     <artifactId>cocochagen-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
@@ -20,7 +20,7 @@
         <maven-plugin-annotations.version>3.8.1</maven-plugin-annotations.version>
         <maven-site-plugin.version>4.0.0-M6</maven-site-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-plugin-api.version>3.9.0</maven-plugin-api.version>
+        <maven-plugin-api.version>3.9.1</maven-plugin-api.version>
     </properties>
     <dependencies>
 
