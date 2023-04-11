@@ -41,10 +41,10 @@ jobs:
             -   name: Maven bump version
                 run: ./mvnw -B build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}'
 
-            -   name: Get version
+            -   name: Get current version
                 run: |
                     MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
-                    echo "::set-output name=version::$MVN_VERSION"
+                    echo "{version}::{$MVN_VERSION}"
                 id: get_version
 
             -   name: Maven build
@@ -67,7 +67,7 @@ jobs:
             -   name: Get new version
                 run: |
                     MVN_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
-                    echo "::set-output name=version::$MVN_VERSION"
+                    echo "{version}::{$MVN_VERSION}"
                 id: get_new_version
 
             -   name: Commit version

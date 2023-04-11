@@ -65,7 +65,7 @@ class GitService(baseDir: File? = null) {
             .findGitDir(baseDir ?: File("").absoluteFile)
             .build()
     private val git = Git(repository)
-    private val tagPattern = Pattern.compile("refs/tags/(v(\\d+)\\.(\\d+)\\.(\\d+))")
+    private val tagPattern = Pattern.compile("refs/tags/(v?(\\d+)\\.(\\d+)\\.(\\d+))")
     private val typePattern =
             Pattern.compile("^\\s*(?<T>${CommitType.buildPattern()})\\s*([(](?<C>\\w*)[)]\\s*)?:\\s*(?<D>.*)")
 

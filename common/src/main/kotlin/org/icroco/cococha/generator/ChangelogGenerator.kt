@@ -15,30 +15,28 @@ import java.util.regex.Pattern
 
 private val logger = KotlinLogging.logger {}
 
-val defaultIssueRegex: Pattern = Pattern.compile(
-    "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))",
-    Pattern.DOTALL
-)
+val defaultIssueRegex: Pattern = Pattern.compile("(((Closes)\\s*:)?\\s*#(?<ID>\\d+)\\s*)",
+                                                 (Pattern.DOTALL or Pattern.CASE_INSENSITIVE))
 
 data class GeneratorParams(
-    var template: Path?,
-    var overrideExisting: Boolean = false,
-    var appendToStart: Boolean = false,
-    var releaseName: String?,
-    val outputFile: String?,
-    val releaseCount: Int = 1,
-    val filterCommitType: List<CommitType> = listOf(
-        CommitType.BUG_FIX,
-        CommitType.FEAT,
-        CommitType.PERFORMANCE
-    ),
-    val addCommitLink: Boolean = true,
-    val gitCommitUrl: String? = null,
-    val addIssueLink: Boolean = true,
-    val issueUrl: String? = null,
-    val IssueIdRegex: Pattern = defaultIssueRegex,
-    val removeDuplicate: Boolean = true,
-    val fetchTags: Boolean = false
+        var template: Path?,
+        var overrideExisting: Boolean = false,
+        var appendToStart: Boolean = false,
+        var releaseName: String?,
+        val outputFile: String?,
+        val releaseCount: Int = 1,
+        val filterCommitType: List<CommitType> = listOf(
+                CommitType.BUG_FIX,
+                CommitType.FEAT,
+                CommitType.PERFORMANCE
+        ),
+        val addCommitLink: Boolean = true,
+        val gitCommitUrl: String? = null,
+        val addIssueLink: Boolean = true,
+        val issueUrl: String? = null,
+        val issueIdRegex: Pattern = defaultIssueRegex,
+        val removeDuplicate: Boolean = true,
+        val fetchTags: Boolean = false
 ) {
     fun getTemplateReader(): Reader {
         val t = template?.let {
@@ -76,13 +74,13 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         logger.info { "Output file is: '${path?.toAbsolutePath() ?: "stdout"}'" }
         logger.info { "Output override existing is: '${params.overrideExisting}'" }
         logger.info { "Output append at start: '${params.appendToStart}'" }
-        logger.info { "Last Release name is: '${params.releaseName}'" }
+        logger.info { "Last release name is: '${params.releaseName}'" }
         logger.info { "Release Count is: '${params.releaseCount}'" }
         logger.info { "Fetch all tags is: '${params.fetchTags}'" }
         logger.info { "Filter commit log with: '${params.filterCommitType.joinToString(",") { it.prefix }}'" }
         logger.info { "Git commit URL: '${if (params.addCommitLink) gitUrl else "Disabled"}'" }
         logger.info { "Issue URL: '${if (params.addIssueLink) (issueUrl ?: "None") else "Disabled"}'" }
-        logger.info { "Issue ID Regex: '${params.IssueIdRegex.pattern() ?: "None"}'" }
+        logger.info { "Issue ID Regex: '${params.issueIdRegex.pattern() ?: "None"}'" }
         logger.info { "Remove duplicate commits: '${params.removeDuplicate}'" }
         logger.info { "Mustache template: '${params.template ?: "embedded"}'" }
         val template = Mustache.compiler().compile(params.getTemplateReader())
@@ -90,7 +88,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
                                               tags,
                                               params.releaseCount,
                                               params.filterCommitType,
-                                              params.IssueIdRegex,
+                                              params.issueIdRegex,
                                               params.removeDuplicate)
         val md = template.execute(Releases(releases, gitUrl, issueUrl))
 
@@ -145,7 +143,7 @@ class ChangelogGenerator(private val params: GeneratorParams) {
         }
         logger.debug { "Final Release Name: '${name}'" }
         return name
-                ?: throw IllegalArgumentException("Release name can not be null and cannot be computed from semantic version found in last tag")
+               ?: throw IllegalArgumentException("Release name can not be null and cannot be computed from semantic version found in last tag")
     }
 }
 

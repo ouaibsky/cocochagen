@@ -31,7 +31,7 @@ Can be renamed whatever.
         <dependency>
           <groupId>org.icroco.cocochagen</groupId>
           <artifactId>cocochagen-cli</artifactId>
-          <version>1.0.4</version>
+          <version>1.1.3</version>
         </dependency>
         ```
 
@@ -40,9 +40,9 @@ Can be renamed whatever.
 ```xml
       <plugin>
           <groupId>org.icroco.cocochagen</groupId>
-          <artifactId>cocochagen-maven-plugin</artifactId>
-          <version>1.0.4</version>
-          <configuration>
+    <artifactId>cocochagen-maven-plugin</artifactId>
+    <version>1.1.3</version>
+    <configuration>
               <overrideExisting>true</overrideExisting>
               <releaseCount>5</releaseCount>
               <filterCommitTypes>*</filterCommitTypes>
@@ -99,7 +99,7 @@ Conventional Commit Changelog Generator
   -i, --issue-url=<issueUrl>
                            Tracker URL (Jira. github ...)
                            If a card/issue ID is found is will be tail at the end
-                           Option undefined means we'll used github
+                           Option undefined means we will used github.
 
       --issue-id-pattern=<issueIdRegex>
                            a regexp to match an issue id
@@ -111,15 +111,15 @@ Conventional Commit Changelog Generator
                                git: "(#(?<ID>\\d+))",
                                jira: "(?<ID>JIRA-\\d+)"
                                Strict conventional commit: "(Closes: )#(?<ID>\\d+)"
-                               Advanced conventional commit: "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#(?<ID>\\d+))"
-                               Mix git and coco style: "(([Cc][Ll][Oo][Ss][Ee][Ss][ \t]*:[ \t]*)?#?(?<ID>\\d+))"
+                               Advanced conventional commit: "(((Closes)\s*:)?\s*#(?<ID>\d+)\s*)"
+                               Mix git and coco style: "(((Closes)\s*:)?\s*#?(?<ID>\d+)\s*)"
                            Regex must be java compatible: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
-                           Default is git style optionally with prefix 'Closes: ' '(([Cc][Ll][Oo][Ss][Ee][Ss][  ]*:[    ]*)?#(?<ID>\d+))'
+                           Default is git style optionally with prefix 'Closes: ' '(((Closes)\s*:)?\s*#(?<ID>\d+)\s*)'
 
   -n, --release-name=<releaseName>
-                           Provide the name of this release
-                           By default is automatically computed from last tag if you follow semantic versioning
-                           Option undefined means automatic release name'
+                           Provide the name of a release from which we will start to analyze changes.
+                           By default is automatically computed from last valid tag if you follow semantic versioning.
+                           Option undefined means automatic release name
 
       --[no-]commit-link   Add git commit URL for change log
                            Default is: 'true'
@@ -166,12 +166,14 @@ Conventional Commit Changelog Generator
 - [x] Generate changelog at beginning of an existing one.
 - [x] Do not override existing changelog. add option to force overriding.
 - [x] Publish to maven central.
+- [ ] Option to group changes by major/minor.
 - [ ] Option to add/hide: "Contributor".
 - [ ] Option to customize Commit Type label (Features, ...).
 - [ ] Export report into json format.
-- [ ] Add github actions.
+- [x] Add github actions.
 - [ ] Gradle Plugin.
 - [ ] Native CLI with GraalVM.
+- [x] Maven plugin add skip option.
 
 # Trouble Shooting
 * Runtime working dir: be careful, right now you won't have same results if your run with **java -jar ...** ot **./cocochgen.jar**

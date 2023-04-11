@@ -186,7 +186,7 @@ public class CoCoChaGenMojo
                     gitCommitUrl,
                     addIssueLink,
                     issueUrl,
-                    Pattern.compile(issueIdRegex, Pattern.DOTALL),
+                    Pattern.compile(issueIdRegex, Pattern.DOTALL | Pattern.CASE_INSENSITIVE),
                     removeDuplicate,
                     fetchTags);
             new ChangelogGenerator(params).run();
